@@ -3,7 +3,7 @@
   <p>A Level 99 Code Sorcerer crafting digital realms with passion and code.</p>
   
   <!-- 嵌入 Vercel 页面链接 -->
-  <a href="https://maya970-profile.vercel.app">
+  <a href="https://maya970.vercel.app/">
     <img src="https://i.imgur.com/your-screenshot.png" alt="Interactive 3D Profile" width="600"/>
   </a>
   <p>👆 Click to explore my interactive 3D skills matrix! 👆</p>
