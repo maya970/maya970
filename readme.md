@@ -65,8 +65,9 @@
 - **[个人信息页](https://index.mxzgh.com)**: 使用Three.js打造的交互式3D档案。
 - **[冒险者公会](https://mxzgh.ct.ws)**: 国策贴游聚落。
 - **[ogame群星](https://game.mxzgh.com)**: 传统ogame游戏
-- **[小说书单](https://book.mxzgh.com)**: 全新的小说一览表
----
+- **[小说书单](https://novel.ct.ws)**: 全新的小说一览表
+- **[ar生态一览表](http://ar.gt.tc/)**: ar生态的中文展示
+- **[历史小说一览表 旧](https://booklist-two-ebon.vercel.app/cn/index.html)**: 历史小说一览表
 
 <div align="center">
   <p>🔥 由热情与代码驱动 ☕</p>
