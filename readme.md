@@ -1,9 +1,12 @@
 <div align="center">
-  <img src="https://i.imgur.com/your-threejs-animation.gif" alt="3D Skills Animation" width="600"/>
-
-  # 🎮 Welcome to [YourUsername]'s CyberSmith Profile 🚀
-
-  <p>A passionate coder crafting digital worlds with code and creativity.</p>
+  <h1>🎮 Maya970's Cyber Profile 🚀</h1>
+  <p>A Level 99 Code Sorcerer crafting digital realms with passion and code.</p>
+  
+  <!-- 嵌入 Vercel 页面链接 -->
+  <a href="https://maya970-profile.vercel.app">
+    <img src="https://i.imgur.com/your-screenshot.png" alt="Interactive 3D Profile" width="600"/>
+  </a>
+  <p>👆 Click to explore my interactive 3D skills matrix! 👆</p>
 </div>
 
 ---
@@ -18,7 +21,7 @@
     </tr>
     <tr>
       <td>⚡ JavaScript</td>
-      <td>Master of dynamic web interactions</td>
+      <td>Master of dynamic web development</td>
       <td><img src="https://img.shields.io/badge/Level-90%25-blueviolet?style=flat-square"/></td>
     </tr>
     <tr>
@@ -43,29 +46,29 @@
 
 ## 📊 CyberSmith Stats
 <div align="center">
-  <img src="https://github-readme-stats.vercel.app/api?username=yourusername&show_icons=true&theme=radical" alt="GitHub Stats"/>
-  <img src="https://github-profile-trophy.vercel.app/?username=yourusername&theme=cyberpunk" alt="Trophies"/>
+  <img src="https://github-readme-stats.vercel.app/api?username=maya970&show_icons=true&theme=radical" alt="GitHub Stats"/>
+  <img src="https://github-profile-trophy.vercel.app/?username=maya970&theme=cyberpunk" alt="Trophies"/>
 </div>
 
 ---
 
 ## 🔗 Connect to the Network
 <div align="center">
-  <a href="https://twitter.com/yourusername"><img src="https://img.icons8.com/color/48/000000/twitter.png" width="32"/></a>
-  <a href="https://linkedin.com/in/yourusername"><img src="https://img.icons8.com/color/48/000000/linkedin.png" width="32"/></a>
-  <a href="https://youtube.com/yourchannel"><img src="https://img.icons8.com/color/48/000000/youtube.png" width="32"/></a>
-  <a href="https://discord.com/users/yourusername">Discord: @yourusername</a>
+  <a href="https://twitter.com/maya970"><img src="https://img.icons8.com/color/48/000000/twitter.png" width="32"/></a>
+  <a href="https://github.com/maya970"><img src="https://img.icons8.com/color/48/000000/github.png" width="32"/></a>
+  <a href="https://linkedin.com/in/maya970"><img src="https://img.icons8.com/color/48/000000/linkedin.png" width="32"/></a>
+  <a href="https://discord.com/users/maya970">Discord: @maya970</a>
 </div>
 
 ---
 
 ## 🎮 Pinned Quests
-- **[cyber-project](https://github.com/yourusername/cyber-project)**: A futuristic web app built with React and Three.js.
-- **[rust-engine](https://github.com/yourusername/rust-engine)**: High-performance game engine prototype.
-- **[data-viz](https://github.com/yourusername/data-viz)**: Interactive data visualizations with Python.
+- **[maya970-profile](https://github.com/maya970/maya970-profile)**: Interactive 3D profile with Three.js.
+- **[project-1](https://github.com/maya970/project-1)**: A futuristic web app.
+- **[project-2](https://github.com/maya970/project-2)**: High-performance Rust project.
 
 ---
 
 <div align="center">
-  <p>🔥 Powered by passion and coffee ☕</p>
+  <p>🔥 Powered by passion and code ☕</p>
 </div>
