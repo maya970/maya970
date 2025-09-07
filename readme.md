@@ -53,10 +53,9 @@
 
 ## 🔗 连接网络
 <div align="center">
-  <a href="https://twitter.com/maya970"><img src="https://img.icons8.com/color/48/twitter.png" width="32"/></a>
+  <a href="https://twitter.com/shorttrber"><img src="https://img.icons8.com/color/48/twitter.png" width="32"/></a>
   <a href="https://github.com/maya970"><img src="https://img.icons8.com/color/48/github.png" width="32"/></a>
-  <a href="https://linkedin.com/in/maya970"><img src="https://img.icons8.com/color/48/linkedin.png" width="32"/></a>
-  <a href="https://discord.com/users/maya970">Discord: @maya970</a>
+
 </div>
 
 ---
