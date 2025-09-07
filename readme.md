@@ -1,61 +1,57 @@
 <div align="center">
-  <h1>🎮 Maya970's Cyber Profile 🚀</h1>
-  <p>Level 99 Code Sorcerer | Crafting Digital Realms with Passion and Code</p>
+  <h1>🎮 Maya970 的赛博档案 🚀</h1>
+  <p>60级代码巫师 | 用热情与代码打造数字领域</p>
   
-  <!-- Three.js 动画预览 -->
-  <a href="https://maya970-profile.vercel.app">
-    <img src="https://i.imgur.com/your-animation.gif" alt="Interactive 3D Skills Matrix" width="600"/>
-  </a>
-  <p>👆 Click to explore my interactive 3D skills matrix! 👆</p>
+
 </div>
 
 ---
 
-## 🛠️ CyberSkill Matrix
+## 🛠️ 赛博技能矩阵
 <div align="center">
   ╔══════════════════════════════════════╗
-  ║          Skill Inventory             ║
+  ║            技能清单                  ║
   ╚══════════════════════════════════════╝
   <table>
     <tr>
-      <th>Skill</th>
-      <th>Description</th>
-      <th>Level</th>
+      <th>技能</th>
+      <th>描述</th>
+      <th>等级</th>
     </tr>
     <tr>
-      <td>⚡ JavaScript</td>
-      <td>Dynamic web development</td>
-      <td><img src="https://img.shields.io/badge/Level-90%25-blueviolet?style=plastic&logo=javascript"/></td>
+      <td>⚡ PHP</td>
+      <td>动态网站开发大师</td>
+      <td><img src="https://img.shields.io/badge/等级-90%25-blueviolet?style=plastic&logo=php"/></td>
     </tr>
     <tr>
-      <td>🦀 Rust</td>
-      <td>High-performance programming</td>
-      <td><img src="https://img.shields.io/badge/Level-75%25-orange?style=plastic&logo=rust"/></td>
+      <td>🦀 JavaScript</td>
+      <td>高性能前端编程</td>
+      <td><img src="https://img.shields.io/badge/等级-75%25-orange?style=plastic&logo=javascript"/></td>
     </tr>
     <tr>
-      <td>🐍 Python</td>
-      <td>Data science & automation</td>
-      <td><img src="https://img.shields.io/badge/Level-85%25-green?style=plastic&logo=python"/></td>
+      <td>🐍 Vue.js</td>
+      <td>构建流畅的用户界面</td>
+      <td><img src="https://img.shields.io/badge/等级-85%25-green?style=plastic&logo=vue.js"/></td>
     </tr>
     <tr>
       <td>🎨 Three.js</td>
-      <td>3D web visualizations</td>
-      <td><img src="https://img.shields.io/badge/Level-60%25-pink?style=plastic"/></td>
+      <td>3D网页视觉效果</td>
+      <td><img src="https://img.shields.io/badge/等级-60%25-pink?style=plastic&logo=three.js"/></td>
     </tr>
   </table>
 </div>
 
 ---
 
-## 📊 Cyber Stats
+## 📊 赛博统计
 <div align="center">
-  <img src="https://github-readme-stats.vercel.app/api?username=maya970&show_icons=true&theme=radical" alt="GitHub Stats"/>
-  <img src="https://github-profile-trophy.vercel.app/?username=maya970&theme=cyberpunk" alt="Trophies"/>
+  <img src="https://github-readme-stats.vercel.app/api?username=maya970&show_icons=true&theme=radical" alt="GitHub统计"/>
+  <img src="https://github-profile-trophy.vercel.app/?username=maya970&theme=cyberpunk" alt="奖杯"/>
 </div>
 
 ---
 
-## 🔗 Connect to the Network
+## 🔗 连接网络
 <div align="center">
   <a href="https://twitter.com/maya970"><img src="https://img.icons8.com/color/48/twitter.png" width="32"/></a>
   <a href="https://github.com/maya970"><img src="https://img.icons8.com/color/48/github.png" width="32"/></a>
@@ -65,13 +61,13 @@
 
 ---
 
-## 🎮 Pinned Quests
-- **[maya970-profile](https://github.com/maya970/maya970-profile)**: Interactive 3D profile with Three.js.
-- **[project-1](https://github.com/maya970/project-1)**: A futuristic web app.
-- **[project-2](https://github.com/maya970/project-2)**: High-performance Rust project.
-
+## 🎮 项目一栏
+- **[个人信息页](https://index.mxzgh.com)**: 使用Three.js打造的交互式3D档案。
+- **[冒险者公会](https://mxzgh.ct.ws)**: 国策贴游聚落。
+- **[ogame群星](https://game.mxzgh.com)**: 传统ogame游戏
+- **[小说书单](https://book.mxzgh.com)**: 全新的小说一览表
 ---
 
 <div align="center">
-  <p>🔥 Powered by Passion and Code ☕</p>
+  <p>🔥 由热情与代码驱动 ☕</p>
 </div>
