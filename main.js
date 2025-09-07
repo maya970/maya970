@@ -1,6 +1,5 @@
 import * as THREE from 'three';
 
-// 场景、相机、渲染器
 const scene = new THREE.Scene();
 const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
 const renderer = new THREE.WebGLRenderer({ canvas: document.querySelector('#bg'), antialias: true });
@@ -21,9 +20,9 @@ scene.add(particles);
 
 // 技能数据
 const skills = [
-  { name: 'JavaScript', desc: 'Master of dynamic web development', texture: 'assets/js.png', position: [-2, 1, 0] },
-  { name: 'Rust', desc: 'High-performance systems programming', texture: 'assets/rust.png', position: [0, 1, 0] },
-  { name: 'Python', desc: 'Data science and automation wizard', texture: 'assets/python.png', position: [2, 1, 0] },
+  { name: 'JavaScript', desc: 'Dynamic web development', texture: 'assets/js.png', position: [-2, 1, 0] },
+  { name: 'Rust', desc: 'High-performance programming', texture: 'assets/rust.png', position: [0, 1, 0] },
+  { name: 'Python', desc: 'Data science & automation', texture: 'assets/python.png', position: [2, 1, 0] },
   { name: 'Three.js', desc: '3D web visualizations', texture: 'assets/threejs.png', position: [-1, -1, 0] },
 ];
 
@@ -40,7 +39,7 @@ skills.forEach(skill => {
   skillMeshes.push(mesh);
 });
 
-// 交互（点击显示技能详情）
+// 交互
 const raycaster = new THREE.Raycaster();
 const mouse = new THREE.Vector2();
 window.addEventListener('click', event => {
@@ -55,11 +54,11 @@ window.addEventListener('click', event => {
   }
 });
 
-// 动画循环
+// 动画
 function animate() {
   requestAnimationFrame(animate);
   skillMeshes.forEach(mesh => {
-    mesh.rotation.y += 0.01; // 旋转效果
+    mesh.rotation.y += 0.01;
   });
   particles.rotation.y += 0.001;
   renderer.render(scene, camera);
