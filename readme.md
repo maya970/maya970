@@ -63,6 +63,8 @@
 ## 🎮 项目一栏
 
 - **[历史小说一览表 旧](https://booklist-two-ebon.vercel.app/cn/index.html)**: 历史小说一览表
+- **[Arweave永久存储日记](https://ardaohang.vercel.app/)**: Arweave永久存储日记
+- **[Arweave永久小说网站](https://arnovel.vercel.app/)**: Arweave永久小说网站
 
 <div align="center">
   <p>🔥 由热情与代码驱动 ☕</p>
