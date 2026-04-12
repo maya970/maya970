@@ -10,33 +10,33 @@
 ## 🛠️ 赛博技能矩阵
 <div align="center">
   ╔══════════════════════════════════════╗
-  ║            技能清单                  ║
+  ║            正在开发                  ║
   ╚══════════════════════════════════════╝
   <table>
     <tr>
-      <th>技能</th>
+      <th>项目</th>
       <th>描述</th>
-      <th>等级</th>
+      <th>完成度</th>
     </tr>
     <tr>
-      <td>⚡ PHP</td>
-      <td>动态网站开发大师</td>
-      <td><img src="https://img.shields.io/badge/等级-90%25-blueviolet?style=plastic&logo=php"/></td>
+      <td>🗡 地下城冒险</td>
+      <td>一款用于参加比赛的游戏</td>
+      <td><img src="https://img.shields.io/badge/进度-15%25-blueviolet?style=plastic&logo=php"/></td>
     </tr>
     <tr>
-      <td>🦀 JavaScript</td>
-      <td>高性能前端编程</td>
-      <td><img src="https://img.shields.io/badge/等级-75%25-orange?style=plastic&logo=javascript"/></td>
+      <td>🥃 冒险者公会重置</td>
+      <td>回合制版晒</td>
+      <td><img src="https://img.shields.io/badge/进度-0%25-orange?style=plastic&logo=javascript"/></td>
     </tr>
     <tr>
-      <td>🐍 Vue.js</td>
+      <td>📕 推书网站</td>
       <td>构建流畅的用户界面</td>
-      <td><img src="https://img.shields.io/badge/等级-85%25-green?style=plastic&logo=vue.js"/></td>
+      <td><img src="https://img.shields.io/badge/进度-65%25-green?style=plastic&logo=vue.js"/></td>
     </tr>
     <tr>
-      <td>🎨 Three.js</td>
+      <td>🏰 塔</td>
       <td>3D网页视觉效果</td>
-      <td><img src="https://img.shields.io/badge/等级-60%25-pink?style=plastic&logo=three.js"/></td>
+      <td><img src="https://img.shields.io/badge/进度-60%25-pink?style=plastic&logo=three.js"/></td>
     </tr>
   </table>
 </div>
@@ -61,11 +61,7 @@
 ---
 
 ## 🎮 项目一栏
-- **[个人信息页](https://index.mxzgh.com)**: 使用Three.js打造的交互式3D档案。
-- **[冒险者公会](https://mxzgh.ct.ws)**: 国策贴游聚落。
-- **[ogame群星](https://game.mxzgh.com)**: 传统ogame游戏
-- **[小说书单](https://novel.ct.ws)**: 全新的小说一览表
-- **[ar生态一览表](http://ar.gt.tc/)**: ar生态的中文展示
+
 - **[历史小说一览表 旧](https://booklist-two-ebon.vercel.app/cn/index.html)**: 历史小说一览表
 
 <div align="center">
