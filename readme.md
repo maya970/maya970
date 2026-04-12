@@ -41,13 +41,6 @@
   </table>
 </div>
 
----
-
-## 📊 赛博统计
-<div align="center">
-  <img src="https://github-readme-stats.vercel.app/api?username=maya970&show_icons=true&theme=radical" alt="GitHub统计"/>
-  <img src="https://github-profile-trophy.vercel.app/?username=maya970&theme=cyberpunk" alt="奖杯"/>
-</div>
 
 ---
 
