@@ -14,24 +14,23 @@ const POSTS = [
   { id: "10", title: "虚空界面 · 采样 J", excerpt: "点击展开中央大图。", image: "./10.png" },
 ];
 
-/** 主平面：单一大网格（横竖一体），比视窗大，四面重复感 */
-const MAIN_COLS = 14;
-const MAIN_ROWS = 12;
-const MAIN_CELL = 94;
-const MAIN_GAP = 11;
+/** 十字：中心左右各 ARM 格；竖条不含中心格（避免与横条重复） */
+const ARM = 4;
+const CELL = 90;
+const GAP = 10;
+const PLANE_PAD = 420;
 
-/** 背后多层：越来越小 / 越来越密，带图 + 线网 */
-const ECHO_LAYERS = [
-  { cols: 10, rows: 7, cell: 56, gap: 8, blur: 2.8, opacity: 0.2, speed: 0.05, phase: [0, 0], lineScale: 1.4 },
-  { cols: 14, rows: 10, cell: 46, gap: 6, blur: 2.1, opacity: 0.26, speed: 0.09, phase: [40, 22], lineScale: 1.1 },
-  { cols: 19, rows: 14, cell: 36, gap: 5, blur: 1.4, opacity: 0.3, speed: 0.14, phase: [-28, 36], lineScale: 0.85 },
-  { cols: 26, rows: 18, cell: 28, gap: 4, blur: 0.9, opacity: 0.34, speed: 0.19, phase: [18, -14], lineScale: 0.65 },
-  { cols: 34, rows: 24, cell: 22, gap: 3, blur: 0.55, opacity: 0.38, speed: 0.24, phase: [-12, -30], lineScale: 0.5 },
+/** 五层十字由后往前：缩放、模糊、透明度、视差系数、线网疏密 */
+const CROSS_LAYERS = [
+  { scale: 0.74, blur: 3.2, opacity: 0.4, speed: 0.055, lineScale: 1.55, phase: [18, -12] },
+  { scale: 0.82, blur: 2.4, opacity: 0.5, speed: 0.09, lineScale: 1.25, phase: [-22, 16] },
+  { scale: 0.9, blur: 1.7, opacity: 0.62, speed: 0.13, lineScale: 1, phase: [10, 24] },
+  { scale: 0.96, blur: 1, opacity: 0.78, speed: 0.17, lineScale: 0.82, phase: [-14, -20] },
+  { scale: 1, blur: 0, opacity: 1, speed: 0.21, lineScale: 0.68, phase: [0, 0], interactive: true },
 ];
 
 const scrollSurface = document.getElementById("scrollSurface");
 const plane = document.getElementById("plane");
-const echoStack = document.getElementById("echoStack");
 const lightbox = document.getElementById("lightbox");
 const lbImg = document.getElementById("lbImg");
 const lbTitle = document.getElementById("lbTitle");
@@ -45,7 +44,9 @@ const clockEl = document.getElementById("clock");
 
 const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
-let echoInners = [];
+const pitch = CELL + GAP;
+const crossSpan = (2 * ARM + 1) * pitch;
+let crossShifts = [];
 let suppressCardClick = false;
 
 function pad(n) {
@@ -125,100 +126,150 @@ function spawnDiamondEchoes(activeSrc) {
   });
 }
 
-function buildCard(post) {
+function buildCard(post, opts) {
+  const { compact, interactive } = opts;
   const card = document.createElement("div");
-  card.className = "card";
-  card.setAttribute("role", "button");
-  card.tabIndex = 0;
-  card.setAttribute("aria-label", `打开文章：${post.title}`);
-  card.innerHTML = `
+  card.className = compact ? "card card--depth" : "card";
+  card.style.width = `${CELL}px`;
+  card.style.height = `${CELL}px`;
+  card.style.position = "absolute";
+  if (!interactive) {
+    card.setAttribute("aria-hidden", "true");
+    card.tabIndex = -1;
+  } else {
+    card.setAttribute("role", "button");
+    card.tabIndex = 0;
+    card.setAttribute("aria-label", `打开文章：${post.title}`);
+  }
+
+  if (compact) {
+    card.innerHTML = `
+      <div class="card-inner">
+        <img src="${post.image}" alt="" loading="lazy" decoding="async" />
+      </div>
+    `;
+  } else {
+    card.innerHTML = `
       <span class="card-index">${post.id}</span>
       <div class="card-inner">
         <img src="${post.image}" alt="" loading="lazy" decoding="async" />
       </div>
       <div class="card-label">${post.title}</div>
     `;
-  const go = () => {
-    if (suppressCardClick) return;
-    openLightbox(post);
-  };
-  card.addEventListener("click", go);
-  card.addEventListener("keydown", (e) => {
-    if (e.key === "Enter" || e.key === " ") {
-      e.preventDefault();
-      go();
-    }
-  });
+  }
+
+  if (interactive) {
+    const go = () => {
+      if (suppressCardClick) return;
+      openLightbox(post);
+    };
+    card.addEventListener("click", go);
+    card.addEventListener("keydown", (e) => {
+      if (e.key === "Enter" || e.key === " ") {
+        e.preventDefault();
+        go();
+      }
+    });
+  }
+
   return card;
 }
 
-function buildEchoCell(post) {
-  const cell = document.createElement("div");
-  cell.className = "echo-cell";
-  const img = document.createElement("img");
-  img.src = post.image;
-  img.alt = "";
-  img.loading = "lazy";
-  img.decoding = "async";
-  cell.appendChild(img);
-  return cell;
+function postAt(layerIdx, hx, hy) {
+  const k = layerIdx * 11 + hx * 3 + hy * 5 + 100;
+  return POSTS[((k % POSTS.length) + POSTS.length) % POSTS.length];
 }
 
-function renderEchoLayers() {
-  echoStack.innerHTML = "";
-  echoInners = [];
-  ECHO_LAYERS.forEach((cfg, layerIdx) => {
-    const layer = document.createElement("div");
-    layer.className = "echo-layer";
-    layer.dataset.speed = String(cfg.speed);
-    layer.style.zIndex = String(layerIdx + 1);
+function fillCrossArm(shift, layerIdx, interactive) {
+  const armH = document.createElement("div");
+  armH.className = "cross-arm cross-arm--h";
+  const armV = document.createElement("div");
+  armV.className = "cross-arm cross-arm--v";
 
-    const mesh = document.createElement("div");
-    mesh.className = "echo-mesh";
-    mesh.style.setProperty("--line-scale", String(cfg.lineScale));
+  const cx = crossSpan / 2;
+  const cy = crossSpan / 2;
 
-    const inner = document.createElement("div");
-    inner.className = "echo-layer-inner";
-    const w = cfg.cols * cfg.cell + (cfg.cols - 1) * cfg.gap;
-    const h = cfg.rows * cfg.cell + (cfg.rows - 1) * cfg.gap;
-    inner.style.width = `${w}px`;
-    inner.style.height = `${h}px`;
+  const half = CELL / 2;
 
-    const grid = document.createElement("div");
-    grid.className = "echo-grid";
-    grid.style.gridTemplateColumns = `repeat(${cfg.cols}, ${cfg.cell}px)`;
-    grid.style.gap = `${cfg.gap}px`;
-    grid.style.setProperty("--echo-blur", `${cfg.blur}px`);
-    grid.style.setProperty("--echo-opacity", String(cfg.opacity));
+  for (let x = -ARM; x <= ARM; x++) {
+    const p = postAt(layerIdx, x, 0);
+    const c = buildCard(p, { compact: !interactive, interactive });
+    c.style.left = `${cx + x * pitch - half}px`;
+    c.style.top = `${cy - half}px`;
+    armH.appendChild(c);
+  }
 
-    const offset = layerIdx * 3 + 1;
-    for (let r = 0; r < cfg.rows; r++) {
-      for (let c = 0; c < cfg.cols; c++) {
-        const idx = (r * cfg.cols + c + offset) % POSTS.length;
-        grid.appendChild(buildEchoCell(POSTS[idx]));
-      }
-    }
+  for (let y = -ARM; y <= ARM; y++) {
+    if (y === 0) continue;
+    const p = postAt(layerIdx, 0, y);
+    const c = buildCard(p, { compact: !interactive, interactive });
+    c.style.left = `${cx - half}px`;
+    c.style.top = `${cy + y * pitch - half}px`;
+    armV.appendChild(c);
+  }
 
-    inner.appendChild(mesh);
-    inner.appendChild(grid);
-    layer.appendChild(inner);
-    echoStack.appendChild(layer);
-    echoInners.push({ el: inner, cfg });
-  });
+  shift.appendChild(armH);
+  shift.appendChild(armV);
 }
 
 function renderPlane() {
   plane.innerHTML = "";
-  plane.style.gridTemplateColumns = `repeat(${MAIN_COLS}, ${MAIN_CELL}px)`;
-  plane.style.gap = `${MAIN_GAP}px`;
-  plane.style.padding = "56px";
+  crossShifts = [];
 
-  for (let r = 0; r < MAIN_ROWS; r++) {
-    for (let c = 0; c < MAIN_COLS; c++) {
-      const idx = (r * MAIN_COLS + c) % POSTS.length;
-      plane.appendChild(buildCard(POSTS[idx]));
-    }
-  }
+  const W = PLANE_PAD * 2 + crossSpan;
+  const H = PLANE_PAD * 2 + crossSpan;
+  plane.style.width = `${W}px`;
+  plane.style.height = `${H}px`;
+  plane.style.position = "relative";
+
+  const origin = document.createElement("div");
+  origin.className = "cross-origin";
+  origin.style.left = `${PLANE_PAD}px`;
+  origin.style.top = `${PLANE_PAD}px`;
+  origin.style.width = `${crossSpan}px`;
+  origin.style.height = `${crossSpan}px`;
+
+  CROSS_LAYERS.forEach((cfg, layerIdx) => {
+    const depth = document.createElement("div");
+    depth.className = "cross-depth";
+    depth.style.zIndex = String(layerIdx + 1);
+    if (!cfg.interactive) depth.classList.add("cross-depth--back");
+
+    const mesh = document.createElement("div");
+    mesh.className = "cross-mesh";
+    mesh.style.setProperty("--line-scale", String(cfg.lineScale));
+    mesh.style.setProperty("--arm", String(ARM));
+    mesh.style.setProperty("--pitch", `${pitch}px`);
+
+    const shift = document.createElement("div");
+    shift.className = "cross-depth-shift";
+    shift.style.setProperty("--arm", String(ARM));
+    shift.style.setProperty("--pitch", `${pitch}px`);
+    shift.style.transformOrigin = "50% 50%";
+    shift.style.filter = cfg.blur > 0 ? `blur(${cfg.blur}px)` : "none";
+    shift.style.opacity = String(cfg.opacity);
+
+    shift.appendChild(mesh);
+    fillCrossArm(shift, layerIdx, !!cfg.interactive);
+
+    depth.appendChild(shift);
+    origin.appendChild(depth);
+
+    crossShifts.push({ el: shift, cfg });
+  });
+
+  plane.appendChild(origin);
+}
+
+function syncCrossParallax() {
+  const sl = scrollSurface.scrollLeft;
+  const st = scrollSurface.scrollTop;
+  const spd = prefersReducedMotion ? 0 : 1;
+  crossShifts.forEach(({ el, cfg }) => {
+    const tx = cfg.phase[0] - sl * cfg.speed * spd;
+    const ty = cfg.phase[1] - st * cfg.speed * spd;
+    el.style.transform = `translate(${tx}px, ${ty}px) scale(${cfg.scale})`;
+  });
 }
 
 function centerScroll() {
@@ -227,19 +278,8 @@ function centerScroll() {
     const maxY = scrollSurface.scrollHeight - scrollSurface.clientHeight;
     scrollSurface.scrollLeft = maxX > 0 ? maxX / 2 : 0;
     scrollSurface.scrollTop = maxY > 0 ? maxY / 2 : 0;
-    syncEchoParallax();
+    syncCrossParallax();
     updateDepth();
-  });
-}
-
-function syncEchoParallax() {
-  const sl = scrollSurface.scrollLeft;
-  const st = scrollSurface.scrollTop;
-  const spd = prefersReducedMotion ? 0 : 1;
-  echoInners.forEach(({ el, cfg }) => {
-    const tx = cfg.phase[0] - sl * cfg.speed * spd;
-    const ty = cfg.phase[1] - st * cfg.speed * spd;
-    el.style.transform = `translate(calc(-50% + ${tx}px), calc(-50% + ${ty}px))`;
   });
 }
 
@@ -318,18 +358,17 @@ document.addEventListener("mousemove", (e) => {
 });
 
 scrollSurface.addEventListener("scroll", () => {
-  syncEchoParallax();
+  syncCrossParallax();
   updateDepth();
 });
 
 window.addEventListener("resize", () => {
-  syncEchoParallax();
+  syncCrossParallax();
   updateDepth();
 });
 
 tickClock();
 setInterval(tickClock, 1000);
-renderEchoLayers();
 renderPlane();
 bindPan();
 centerScroll();
