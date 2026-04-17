@@ -24,7 +24,7 @@
     <div class="hud-brand">
       <span class="hud-mark">◇</span>
       <span class="hud-title">VOID.LOG</span>
-      <span class="hud-sub">十字轨道 / 玻璃缓存</span>
+      <span class="hud-sub">无限平面 / 重复网格</span>
     </div>
     <div class="hud-meta">
       <span id="clock">--:--:--</span>
@@ -35,19 +35,17 @@
 
   <main class="stage">
     <section class="intro-panel">
-      <p class="intro-line">横轨与竖轨在虚空里交叉；条目像数据带一样延伸。点击后银线迸发，选中图在空白中央浮出。</p>
-      <p class="intro-hint">滚轮：在竖带区域上下滑，其余区域左右滑 · Esc 关闭</p>
+      <p class="intro-line">整张「画布」比视窗大得多：横竖是同一张无限网格，四面都可以滑，图案重复延伸。</p>
+      <p class="intro-hint">拖曳平移 · 滚轮上下 · Shift+滚轮左右 · 点格打开 · Esc 关闭</p>
     </section>
 
-    <div class="cross-stage" id="crossStage">
-      <div class="rail rail--h" id="railH" role="region" aria-label="横向图像带">
-        <div class="rail-track rail-track--h" id="trackH"></div>
+    <div class="void-canvas" id="voidCanvas">
+      <div class="echo-stack" id="echoStack" aria-hidden="true"></div>
+      <div class="universe-window">
+        <div class="universe-scroll" id="scrollSurface" role="region" aria-label="无限图像平面">
+          <div class="universe-plane" id="plane"></div>
+        </div>
       </div>
-      <div class="rail rail--v" id="railV" role="region" aria-label="纵向图像带">
-        <div class="rail-track rail-track--v" id="trackV"></div>
-      </div>
-      <div class="cross-glass cross-glass--h" aria-hidden="true"></div>
-      <div class="cross-glass cross-glass--v" aria-hidden="true"></div>
     </div>
   </main>
 
