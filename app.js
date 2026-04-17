@@ -14,19 +14,117 @@ const POSTS = [
   { id: "10", title: "虚空界面 · 采样 J", excerpt: "点击展开中央大图。", image: "./10.png" },
 ];
 
-const PLANE_PAD = 200;
-/** 环状周期 = 单块版图边长 + 缝；与 2×2 平铺一致 */
-const TILE_VOID = 260;
+/** 画布边距：尽量小，让左右两块版图更容易连成一片 */
+const PLANE_PAD = 32;
+/** 环状周期 ≈ 单块版图外框；取 0 使四块十字边贴边、接缝连续 */
+const TILE_VOID = 0;
 
 /**
- * 五层：格数、格子大小、错位、旋转、缩放、模糊…均不同，前后交错，不完全重叠。
+ * 五层：大小/错位/旋转/视差/景深口字框 均拉开；背后更亮、略减模糊以便「口」与十字可读。
+ * translateZ(px)：远为负，强化透视景深。
  */
 const CROSS_LAYERS = [
-  { arm: 6, cell: 62, gap: 8, scale: 0.64, offsetX: -26, offsetY: 16, rot: -1.15, blur: 3.5, opacity: 0.32, speed: 0.048, lineScale: 1.58, phase: [10, -8] },
-  { arm: 5, cell: 70, gap: 9, scale: 0.76, offsetX: 22, offsetY: -22, rot: 0.95, blur: 2.55, opacity: 0.42, speed: 0.085, lineScale: 1.22, phase: [-16, 12] },
-  { arm: 5, cell: 76, gap: 9, scale: 0.84, offsetX: -12, offsetY: -10, rot: -0.62, blur: 1.75, opacity: 0.54, speed: 0.12, lineScale: 0.98, phase: [18, -14] },
-  { arm: 4, cell: 84, gap: 10, scale: 0.93, offsetX: 16, offsetY: 20, rot: 0.5, blur: 0.9, opacity: 0.72, speed: 0.155, lineScale: 0.8, phase: [-10, 20] },
-  { arm: 4, cell: 90, gap: 10, scale: 1, offsetX: 0, offsetY: 0, rot: 0, blur: 0, opacity: 1, speed: 0.19, lineScale: 0.66, phase: [0, 0], interactive: true },
+  {
+    arm: 6,
+    cell: 60,
+    gap: 8,
+    scale: 0.56,
+    offsetX: -58,
+    offsetY: 44,
+    rot: -3.4,
+    z: -200,
+    blur: 2.1,
+    brightness: 0.76,
+    opacity: 0.72,
+    speed: 0.014,
+    lineScale: 1.72,
+    phase: [26, -20],
+    meshOpacity: 0.62,
+    portalOut: 78,
+    portalBw: 5,
+    portalAlpha: 0.62,
+  },
+  {
+    arm: 5,
+    cell: 68,
+    gap: 9,
+    scale: 0.68,
+    offsetX: 52,
+    offsetY: -48,
+    rot: 2.85,
+    z: -138,
+    blur: 1.55,
+    brightness: 0.8,
+    opacity: 0.78,
+    speed: 0.048,
+    lineScale: 1.38,
+    phase: [-32, 24],
+    meshOpacity: 0.58,
+    portalOut: 58,
+    portalBw: 4,
+    portalAlpha: 0.55,
+  },
+  {
+    arm: 5,
+    cell: 76,
+    gap: 9,
+    scale: 0.8,
+    offsetX: -36,
+    offsetY: -28,
+    rot: -1.9,
+    z: -88,
+    blur: 1.05,
+    brightness: 0.86,
+    opacity: 0.84,
+    speed: 0.095,
+    lineScale: 1.08,
+    phase: [22, -18],
+    meshOpacity: 0.52,
+    portalOut: 40,
+    portalBw: 3,
+    portalAlpha: 0.48,
+  },
+  {
+    arm: 4,
+    cell: 84,
+    gap: 10,
+    scale: 0.9,
+    offsetX: 40,
+    offsetY: 36,
+    rot: 1.65,
+    z: -42,
+    blur: 0.42,
+    brightness: 0.93,
+    opacity: 0.92,
+    speed: 0.152,
+    lineScale: 0.86,
+    phase: [-14, 28],
+    meshOpacity: 0.46,
+    portalOut: 24,
+    portalBw: 2,
+    portalAlpha: 0.4,
+  },
+  {
+    arm: 4,
+    cell: 90,
+    gap: 10,
+    scale: 1,
+    offsetX: 0,
+    offsetY: 0,
+    rot: 0,
+    z: 0,
+    blur: 0,
+    brightness: 1,
+    opacity: 1,
+    speed: 0.235,
+    lineScale: 0.64,
+    phase: [0, 0],
+    meshOpacity: 0.4,
+    portalOut: 10,
+    portalBw: 1.5,
+    portalAlpha: 0.28,
+    interactive: true,
+  },
 ];
 
 const scrollSurface = document.getElementById("scrollSurface");
@@ -61,7 +159,7 @@ function computeMaxOriginBox() {
     const oy = Math.abs(cfg.offsetY);
     m = Math.max(m, s + 2 * ox, s + 2 * oy);
   });
-  return Math.ceil(m + 24);
+  return Math.ceil(m + 8);
 }
 
 function pad(n) {
@@ -233,7 +331,6 @@ function buildOneOrigin(maxSpan) {
   origin.className = "cross-origin";
   origin.style.width = `${maxSpan}px`;
   origin.style.height = `${maxSpan}px`;
-
   const shifts = [];
 
   CROSS_LAYERS.forEach((cfg, layerIdx) => {
@@ -243,26 +340,43 @@ function buildOneOrigin(maxSpan) {
     if (!cfg.interactive) depth.classList.add("cross-depth--back");
 
     const layerBox = layerSpanPx(cfg);
-    const mesh = document.createElement("div");
-    mesh.className = "cross-mesh";
-    mesh.style.setProperty("--line-scale", String(cfg.lineScale));
-    mesh.style.setProperty("--arm", String(cfg.arm));
-    mesh.style.setProperty("--pitch", `${cfg.cell + cfg.gap}px`);
-
     const shift = document.createElement("div");
     shift.className = "cross-depth-shift";
     shift.style.setProperty("--arm", String(cfg.arm));
     shift.style.setProperty("--pitch", `${cfg.cell + cfg.gap}px`);
     shift.style.transformOrigin = "50% 50%";
-    shift.style.filter = cfg.blur > 0 ? `blur(${cfg.blur}px)` : "none";
-    shift.style.opacity = String(cfg.opacity);
+    shift.style.opacity = "1";
     shift.style.width = `${layerBox}px`;
     shift.style.height = `${layerBox}px`;
     shift.style.left = `${(maxSpan - layerBox) / 2 + cfg.offsetX}px`;
     shift.style.top = `${(maxSpan - layerBox) / 2 + cfg.offsetY}px`;
 
-    shift.appendChild(mesh);
-    fillCrossArm(shift, cfg, layerIdx, !!cfg.interactive);
+    const body = document.createElement("div");
+    body.className = "cross-depth-body";
+    body.style.opacity = String(cfg.opacity);
+    const filters = [];
+    if (cfg.blur > 0) filters.push(`blur(${cfg.blur}px)`);
+    if (cfg.brightness != null && cfg.brightness < 1) filters.push(`brightness(${cfg.brightness})`);
+    if (cfg.contrast != null && cfg.contrast !== 1) filters.push(`contrast(${cfg.contrast})`);
+    body.style.filter = filters.length ? filters.join(" ") : "none";
+
+    const mesh = document.createElement("div");
+    mesh.className = "cross-mesh";
+    mesh.style.setProperty("--line-scale", String(cfg.lineScale));
+    mesh.style.setProperty("--arm", String(cfg.arm));
+    mesh.style.setProperty("--pitch", `${cfg.cell + cfg.gap}px`);
+    if (cfg.meshOpacity != null) mesh.style.opacity = String(cfg.meshOpacity);
+
+    const portal = document.createElement("div");
+    portal.className = "depth-portal";
+    portal.style.setProperty("--portal-out", `${cfg.portalOut ?? 32}px`);
+    portal.style.setProperty("--portal-bw", `${cfg.portalBw ?? 2}px`);
+    portal.style.setProperty("--portal-alpha", String(cfg.portalAlpha ?? 0.4));
+
+    body.appendChild(mesh);
+    fillCrossArm(body, cfg, layerIdx, !!cfg.interactive);
+    shift.appendChild(body);
+    shift.appendChild(portal);
 
     depth.appendChild(shift);
     origin.appendChild(depth);
@@ -292,7 +406,7 @@ function renderPlane() {
   crossShifts = [];
 
   const maxSpan = computeMaxOriginBox();
-  torusTile = maxSpan + TILE_VOID;
+  torusTile = Math.max(1, maxSpan + TILE_VOID);
 
   const planeW = PLANE_PAD * 2 + torusTile * 2;
   const planeH = PLANE_PAD * 2 + torusTile * 2;
@@ -320,7 +434,8 @@ function syncCrossParallax() {
     const ty = cfg.phase[1] - st * cfg.speed * spd;
     const r = cfg.rot ?? 0;
     const s = cfg.scale ?? 1;
-    el.style.transform = `translate(${tx}px, ${ty}px) rotate(${r}deg) scale(${s})`;
+    const tz = prefersReducedMotion ? 0 : cfg.z ?? 0;
+    el.style.transform = `translate3d(${tx}px, ${ty}px, ${tz}px) rotate(${r}deg) scale(${s})`;
   });
 }
 
