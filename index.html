@@ -1,91 +1,86 @@
+@@ -1,30 +1,67 @@
 <!DOCTYPE html>
+<html lang="en">
 <html lang="zh-CN">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>虚空索引 — 个人日志</title>
+  <title>Maya970's Cyber Profile</title>
+  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css" />
+  <title>VOID LOG — 个人日志</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;500;600&family=Noto+Sans+SC:wght@300;500;700&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="styles.css" />
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500&family=Noto+Sans+SC:wght@300;400;500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="./styles.css" />
 </head>
 <body>
-  <canvas id="void-canvas" aria-hidden="true"></canvas>
-  <div class="ambient" aria-hidden="true"></div>
-  <div class="grid-floor" aria-hidden="true"></div>
-  <div class="depth-fog" aria-hidden="true"></div>
+  <canvas id="bg"></canvas>
+  <div class="ui-overlay">
+    <div class="profile-card">
+      <img src="assets/avatar.png" alt="Avatar" class="avatar" />
+      <h1>Maya970</h1>
+      <p>Level 99 Code Sorcerer</p>
+      <div class="socials">
+        <a href="https://twitter.com/maya970"><img src="https://img.icons8.com/color/32/twitter.png"/></a>
+        <a href="https://github.com/maya970"><img src="https://img.icons8.com/color/32/github.png"/></a>
+        <a href="https://linkedin.com/in/maya970"><img src="https://img.icons8.com/color/32/linkedin.png"/></a>
+  <div class="void-bg" aria-hidden="true">
+    <div class="void-grid"></div>
+    <div class="void-glow"></div>
+    <div class="void-scan"></div>
+  </div>
 
-  <header class="hud glass-plate glass-plate--hud">
-    <div class="hud__brand">
-      <span class="hud__glyph">◇</span>
-      <span class="hud__title">VOID.LOG</span>
+  <div class="cursor-glow" id="cursorGlow" aria-hidden="true"></div>
+
+  <header class="hud-top">
+    <div class="hud-brand">
+      <span class="hud-mark">◇</span>
+      <span class="hud-title">VOID.LOG</span>
+      <span class="hud-sub">个人节点 / 静态缓存</span>
     </div>
-    <p class="hud__tag">个人记录 / 无重力阅览</p>
+    <div class="hud-meta">
+      <span id="clock">--:--:--</span>
+      <span class="sep">│</span>
+      <span>DEPTH: <span id="depthVal">0.00</span></span>
+    </div>
   </header>
 
   <main class="stage">
-    <aside class="figure glass-plate glass-plate--figure" aria-hidden="true">
-      <svg class="figure__svg" viewBox="0 0 120 280" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <defs>
-          <linearGradient id="fg" x1="0%" y1="0%" x2="100%" y2="100%">
-            <stop offset="0%" stop-color="rgba(180, 240, 255, 0.95)" />
-            <stop offset="100%" stop-color="rgba(80, 140, 220, 0.4)" />
-          </linearGradient>
-        </defs>
-        <ellipse cx="60" cy="38" rx="18" ry="22" stroke="url(#fg)" stroke-width="1.2" />
-        <path d="M60 62v52M38 98l22-14 22 14M60 114l-18 68M60 114l18 68M42 150l-16 52M78 150l16 52" stroke="url(#fg)" stroke-width="1.2" stroke-linecap="round" />
-      </svg>
-      <span class="figure__label">OPERATOR</span>
-    </aside>
-
-    <section class="feed-wrap">
-      <p class="feed-hint">滚动或拖拽列表 · 点击进入</p>
-      <div class="feed-scene glass-plate glass-plate--stage" id="feed-scene">
-        <div class="feed-scene__inner">
-          <ul class="feed" id="feed" role="list"></ul>
-        </div>
-        <div class="feed-scene__edge feed-scene__edge--top" aria-hidden="true"></div>
-        <div class="feed-scene__edge feed-scene__edge--bottom" aria-hidden="true"></div>
-      </div>
+    <section class="intro-panel">
+      <p class="intro-line">在空白数据海里滑动条目，点击以展开图像层。</p>
+      <p class="intro-hint">← 横向滑动 / 滚轮（Shift+滚轮）→</p>
     </section>
+
+    <div class="perspective-wrap">
+      <div class="rail-connector" aria-hidden="true"></div>
+      <div class="list-scroller" id="scroller" role="region" aria-label="文章滑动条带">
+        <!-- cards injected by JS -->
+      </div>
+    </div>
+    <div class="skill-detail" id="skill-detail">
+      <h2 id="skill-name">Select a Skill</h2>
+      <p id="skill-desc">Click a skill card to view details</p>
   </main>
 
-  <div class="lightbox" id="lightbox" hidden aria-modal="true" role="dialog">
-    <button type="button" class="lightbox__close glass-plate" id="lb-close" aria-label="关闭">×</button>
-    <div class="lightbox__center">
-      <div class="lightbox__tapes" id="lb-tapes" aria-hidden="true">
-        <span class="lightbox__tape"></span>
-        <span class="lightbox__tape"></span>
-        <span class="lightbox__tape"></span>
-        <span class="lightbox__tape"></span>
-        <span class="lightbox__tape"></span>
-        <span class="lightbox__tape"></span>
-        <span class="lightbox__tape"></span>
-      </div>
-      <div class="lightbox__frame glass-plate glass-plate--modal" id="lb-frame">
-        <div class="lightbox__frame-rim" aria-hidden="true"></div>
-        <div class="lightbox__scan"></div>
-        <div class="lightbox__photo-block">
-          <div class="photo-frame photo-frame--modal">
-            <div class="photo-frame__chamfer" aria-hidden="true"></div>
-            <div class="photo-frame__matte" aria-hidden="true"></div>
-            <div class="photo-frame__glass-skin" aria-hidden="true"></div>
-            <div class="photo-frame__img-slot">
-              <img class="lightbox__img" id="lb-img" alt="" />
-            </div>
-            <div class="photo-frame__specular" aria-hidden="true"></div>
-            <div class="photo-frame__corners" aria-hidden="true"></div>
-          </div>
-        </div>
-        <div class="lightbox__meta glass-plate glass-plate--meta">
-          <h2 class="lightbox__title" id="lb-title"></h2>
-          <time class="lightbox__time" id="lb-time"></time>
-          <p class="lightbox__body" id="lb-body"></p>
-        </div>
+  <footer class="hud-bottom">
+    <span>ANTI-DRIFT</span>
+    <span class="footer-quote" id="footerQuote">纵使人们都认为你在说谎</span>
+    <span>LINK STABLE</span>
+  </footer>
+
+  <div class="lightbox" id="lightbox" hidden>
+    <button type="button" class="lightbox-close" id="lbClose" aria-label="关闭">×</button>
+    <div class="lightbox-frame">
+      <img class="lightbox-img" id="lbImg" alt="" />
+      <div class="lightbox-caption">
+        <h2 id="lbTitle"></h2>
+        <p id="lbExcerpt"></p>
       </div>
     </div>
   </div>
+  <script type="module" src="main.js"></script>
 
-  <script src="app.js"></script>
+  <script src="./app.js"></script>
 </body>
 </html>
