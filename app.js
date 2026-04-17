@@ -14,10 +14,24 @@ const POSTS = [
   { id: "10", title: "虚空界面 · 采样 J", excerpt: "点击展开中央大图。", image: "./10.png" },
 ];
 
-const trackH = document.getElementById("trackH");
-const trackV = document.getElementById("trackV");
-const railH = document.getElementById("railH");
-const railV = document.getElementById("railV");
+/** 主平面：单一大网格（横竖一体），比视窗大，四面重复感 */
+const MAIN_COLS = 14;
+const MAIN_ROWS = 12;
+const MAIN_CELL = 94;
+const MAIN_GAP = 11;
+
+/** 背后多层：越来越小 / 越来越密，带图 + 线网 */
+const ECHO_LAYERS = [
+  { cols: 10, rows: 7, cell: 56, gap: 8, blur: 2.8, opacity: 0.2, speed: 0.05, phase: [0, 0], lineScale: 1.4 },
+  { cols: 14, rows: 10, cell: 46, gap: 6, blur: 2.1, opacity: 0.26, speed: 0.09, phase: [40, 22], lineScale: 1.1 },
+  { cols: 19, rows: 14, cell: 36, gap: 5, blur: 1.4, opacity: 0.3, speed: 0.14, phase: [-28, 36], lineScale: 0.85 },
+  { cols: 26, rows: 18, cell: 28, gap: 4, blur: 0.9, opacity: 0.34, speed: 0.19, phase: [18, -14], lineScale: 0.65 },
+  { cols: 34, rows: 24, cell: 22, gap: 3, blur: 0.55, opacity: 0.38, speed: 0.24, phase: [-12, -30], lineScale: 0.5 },
+];
+
+const scrollSurface = document.getElementById("scrollSurface");
+const plane = document.getElementById("plane");
+const echoStack = document.getElementById("echoStack");
 const lightbox = document.getElementById("lightbox");
 const lbImg = document.getElementById("lbImg");
 const lbTitle = document.getElementById("lbTitle");
@@ -30,6 +44,9 @@ const depthVal = document.getElementById("depthVal");
 const clockEl = document.getElementById("clock");
 
 const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+let echoInners = [];
+let suppressCardClick = false;
 
 function pad(n) {
   return String(n).padStart(2, "0");
@@ -121,7 +138,10 @@ function buildCard(post) {
       </div>
       <div class="card-label">${post.title}</div>
     `;
-  const go = () => openLightbox(post);
+  const go = () => {
+    if (suppressCardClick) return;
+    openLightbox(post);
+  };
   card.addEventListener("click", go);
   card.addEventListener("keydown", (e) => {
     if (e.key === "Enter" || e.key === " ") {
@@ -132,36 +152,156 @@ function buildCard(post) {
   return card;
 }
 
-function renderTracks() {
-  trackH.innerHTML = "";
-  trackV.innerHTML = "";
-  POSTS.forEach((p) => trackH.appendChild(buildCard(p)));
-  [...POSTS].reverse().forEach((p) => trackV.appendChild(buildCard(p)));
-  centerTracks();
+function buildEchoCell(post) {
+  const cell = document.createElement("div");
+  cell.className = "echo-cell";
+  const img = document.createElement("img");
+  img.src = post.image;
+  img.alt = "";
+  img.loading = "lazy";
+  img.decoding = "async";
+  cell.appendChild(img);
+  return cell;
 }
 
-function centerTracks() {
+function renderEchoLayers() {
+  echoStack.innerHTML = "";
+  echoInners = [];
+  ECHO_LAYERS.forEach((cfg, layerIdx) => {
+    const layer = document.createElement("div");
+    layer.className = "echo-layer";
+    layer.dataset.speed = String(cfg.speed);
+    layer.style.zIndex = String(layerIdx + 1);
+
+    const mesh = document.createElement("div");
+    mesh.className = "echo-mesh";
+    mesh.style.setProperty("--line-scale", String(cfg.lineScale));
+
+    const inner = document.createElement("div");
+    inner.className = "echo-layer-inner";
+    const w = cfg.cols * cfg.cell + (cfg.cols - 1) * cfg.gap;
+    const h = cfg.rows * cfg.cell + (cfg.rows - 1) * cfg.gap;
+    inner.style.width = `${w}px`;
+    inner.style.height = `${h}px`;
+
+    const grid = document.createElement("div");
+    grid.className = "echo-grid";
+    grid.style.gridTemplateColumns = `repeat(${cfg.cols}, ${cfg.cell}px)`;
+    grid.style.gap = `${cfg.gap}px`;
+    grid.style.setProperty("--echo-blur", `${cfg.blur}px`);
+    grid.style.setProperty("--echo-opacity", String(cfg.opacity));
+
+    const offset = layerIdx * 3 + 1;
+    for (let r = 0; r < cfg.rows; r++) {
+      for (let c = 0; c < cfg.cols; c++) {
+        const idx = (r * cfg.cols + c + offset) % POSTS.length;
+        grid.appendChild(buildEchoCell(POSTS[idx]));
+      }
+    }
+
+    inner.appendChild(mesh);
+    inner.appendChild(grid);
+    layer.appendChild(inner);
+    echoStack.appendChild(layer);
+    echoInners.push({ el: inner, cfg });
+  });
+}
+
+function renderPlane() {
+  plane.innerHTML = "";
+  plane.style.gridTemplateColumns = `repeat(${MAIN_COLS}, ${MAIN_CELL}px)`;
+  plane.style.gap = `${MAIN_GAP}px`;
+  plane.style.padding = "56px";
+
+  for (let r = 0; r < MAIN_ROWS; r++) {
+    for (let c = 0; c < MAIN_COLS; c++) {
+      const idx = (r * MAIN_COLS + c) % POSTS.length;
+      plane.appendChild(buildCard(POSTS[idx]));
+    }
+  }
+}
+
+function centerScroll() {
   requestAnimationFrame(() => {
-    const maxH = trackH.scrollWidth - trackH.clientWidth;
-    const maxV = trackV.scrollHeight - trackV.clientHeight;
-    trackH.scrollLeft = maxH > 0 ? maxH / 2 : 0;
-    trackV.scrollTop = maxV > 0 ? maxV / 2 : 0;
+    const maxX = scrollSurface.scrollWidth - scrollSurface.clientWidth;
+    const maxY = scrollSurface.scrollHeight - scrollSurface.clientHeight;
+    scrollSurface.scrollLeft = maxX > 0 ? maxX / 2 : 0;
+    scrollSurface.scrollTop = maxY > 0 ? maxY / 2 : 0;
+    syncEchoParallax();
     updateDepth();
   });
 }
 
-function pickScrollTarget(clientX, clientY) {
-  const v = railV.getBoundingClientRect();
-  const inV = clientX >= v.left && clientX <= v.right && clientY >= v.top && clientY <= v.bottom;
-  return inV ? trackV : trackH;
+function syncEchoParallax() {
+  const sl = scrollSurface.scrollLeft;
+  const st = scrollSurface.scrollTop;
+  const spd = prefersReducedMotion ? 0 : 1;
+  echoInners.forEach(({ el, cfg }) => {
+    const tx = cfg.phase[0] - sl * cfg.speed * spd;
+    const ty = cfg.phase[1] - st * cfg.speed * spd;
+    el.style.transform = `translate(calc(-50% + ${tx}px), calc(-50% + ${ty}px))`;
+  });
 }
 
 function updateDepth() {
-  const maxH = trackH.scrollWidth - trackH.clientWidth || 1;
-  const maxV = trackV.scrollHeight - trackV.clientHeight || 1;
-  const h = trackH.scrollLeft / maxH;
-  const v = trackV.scrollTop / maxV;
-  depthVal.textContent = ((h + v) / 2).toFixed(2);
+  const maxX = scrollSurface.scrollWidth - scrollSurface.clientWidth || 1;
+  const maxY = scrollSurface.scrollHeight - scrollSurface.clientHeight || 1;
+  const nx = scrollSurface.scrollLeft / maxX;
+  const ny = scrollSurface.scrollTop / maxY;
+  depthVal.textContent = Math.hypot(nx, ny).toFixed(2);
+}
+
+function bindPan() {
+  let down = false;
+  let sx = 0;
+  let sy = 0;
+  let sl0 = 0;
+  let st0 = 0;
+  let moved = false;
+
+  scrollSurface.addEventListener("mousedown", (e) => {
+    if (e.button !== 0 || !lightbox.hidden) return;
+    down = true;
+    moved = false;
+    sx = e.clientX;
+    sy = e.clientY;
+    sl0 = scrollSurface.scrollLeft;
+    st0 = scrollSurface.scrollTop;
+    scrollSurface.classList.add("is-grabbing");
+  });
+
+  window.addEventListener("mousemove", (e) => {
+    if (!down) return;
+    const dx = e.clientX - sx;
+    const dy = e.clientY - sy;
+    if (Math.hypot(dx, dy) > 4) moved = true;
+    scrollSurface.scrollLeft = sl0 - dx;
+    scrollSurface.scrollTop = st0 - dy;
+  });
+
+  window.addEventListener("mouseup", () => {
+    if (!down) return;
+    down = false;
+    scrollSurface.classList.remove("is-grabbing");
+    if (moved) {
+      suppressCardClick = true;
+      setTimeout(() => {
+        suppressCardClick = false;
+      }, 80);
+    }
+  });
+
+  scrollSurface.addEventListener(
+    "wheel",
+    (e) => {
+      if (!lightbox.hidden) return;
+      if (e.shiftKey) {
+        e.preventDefault();
+        scrollSurface.scrollLeft += e.deltaY;
+      }
+    },
+    { passive: false }
+  );
 }
 
 lbClose.addEventListener("click", closeLightbox);
@@ -177,24 +317,19 @@ document.addEventListener("mousemove", (e) => {
   cursorGlow.style.transform = `translate(${e.clientX}px, ${e.clientY}px)`;
 });
 
-document.addEventListener(
-  "wheel",
-  (e) => {
-    if (!lightbox.hidden) return;
-    const target = pickScrollTarget(e.clientX, e.clientY);
-    e.preventDefault();
-    if (target === trackV) {
-      trackV.scrollTop += e.deltaY + e.deltaX;
-    } else {
-      trackH.scrollLeft += e.deltaY + e.deltaX;
-    }
-  },
-  { passive: false }
-);
+scrollSurface.addEventListener("scroll", () => {
+  syncEchoParallax();
+  updateDepth();
+});
 
-trackH.addEventListener("scroll", updateDepth, { passive: true });
-trackV.addEventListener("scroll", updateDepth, { passive: true });
+window.addEventListener("resize", () => {
+  syncEchoParallax();
+  updateDepth();
+});
 
 tickClock();
 setInterval(tickClock, 1000);
-renderTracks();
+renderEchoLayers();
+renderPlane();
+bindPan();
+centerScroll();
