@@ -1,335 +1,780 @@
-/**
- * 文章数据：修改 POSTS 即可。
- */
-const POSTS = [
-  { id: "01", title: "虚空界面 · 采样 A", excerpt: "高亮数据海中的第一层缓存。", image: "./1.png" },
-  { id: "02", title: "虚空界面 · 采样 B", excerpt: "透视网格与青蓝描边。", image: "./2.png" },
-  { id: "03", title: "虚空界面 · 采样 C", excerpt: "滑动轨道上的节点。", image: "./3.png" },
-  { id: "04", title: "虚空界面 · 采样 D", excerpt: "玻璃方格与光晕。", image: "./4.png" },
-  { id: "05", title: "虚空界面 · 采样 E", excerpt: "交叉路径上的缩略图。", image: "./5.png" },
-  { id: "06", title: "虚空界面 · 采样 F", excerpt: "近景交互暗示。", image: "./6.png" },
-  { id: "07", title: "虚空界面 · 采样 G", excerpt: "远景模糊与景深。", image: "./7.png" },
-  { id: "08", title: "虚空界面 · 采样 H", excerpt: "列表延伸向消失点。", image: "./8.png" },
-  { id: "09", title: "虚空界面 · 采样 I", excerpt: "可继续追加条目。", image: "./9.png" },
-  { id: "10", title: "虚空界面 · 采样 J", excerpt: "点击展开中央大图。", image: "./10.png" },
-];
-
-/** 主平面：单一大网格（横竖一体），比视窗大，四面重复感 */
-const MAIN_COLS = 14;
-const MAIN_ROWS = 12;
-const MAIN_CELL = 94;
-const MAIN_GAP = 11;
-
-/** 背后多层：越来越小 / 越来越密，带图 + 线网 */
-const ECHO_LAYERS = [
-  { cols: 10, rows: 7, cell: 56, gap: 8, blur: 2.8, opacity: 0.2, speed: 0.05, phase: [0, 0], lineScale: 1.4 },
-  { cols: 14, rows: 10, cell: 46, gap: 6, blur: 2.1, opacity: 0.26, speed: 0.09, phase: [40, 22], lineScale: 1.1 },
-  { cols: 19, rows: 14, cell: 36, gap: 5, blur: 1.4, opacity: 0.3, speed: 0.14, phase: [-28, 36], lineScale: 0.85 },
-  { cols: 26, rows: 18, cell: 28, gap: 4, blur: 0.9, opacity: 0.34, speed: 0.19, phase: [18, -14], lineScale: 0.65 },
-  { cols: 34, rows: 24, cell: 22, gap: 3, blur: 0.55, opacity: 0.38, speed: 0.24, phase: [-12, -30], lineScale: 0.5 },
-];
-
-const scrollSurface = document.getElementById("scrollSurface");
-const plane = document.getElementById("plane");
-const echoStack = document.getElementById("echoStack");
-const lightbox = document.getElementById("lightbox");
-const lbImg = document.getElementById("lbImg");
-const lbTitle = document.getElementById("lbTitle");
-const lbExcerpt = document.getElementById("lbExcerpt");
-const lbClose = document.getElementById("lbClose");
-const lbRibbons = document.getElementById("lbRibbons");
-const lbDiamond = document.getElementById("lbDiamond");
-const cursorGlow = document.getElementById("cursorGlow");
-const depthVal = document.getElementById("depthVal");
-const clockEl = document.getElementById("clock");
-
-const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-
-let echoInners = [];
-let suppressCardClick = false;
-
-function pad(n) {
-  return String(n).padStart(2, "0");
+:root {
+  --void: #f7fbff;
+  --void-mid: #e8f2fb;
+  --void-deep: #d4e6f5;
+  --cyan: #4ad0ff;
+  --cyan-soft: rgba(74, 208, 255, 0.45);
+  --silver: rgba(230, 236, 245, 0.92);
+  --line-faint: rgba(140, 180, 210, 0.22);
+  --line-mid: rgba(120, 175, 215, 0.35);
+  --text: #152433;
+  --text-soft: rgba(21, 36, 51, 0.62);
+  --glass-bg: rgba(255, 255, 255, 0.12);
+  --glass-border: rgba(255, 255, 255, 0.55);
+  --radius-card: clamp(20px, 4.2vmin, 32px);
+  --radius-inner: clamp(16px, 3.4vmin, 26px);
+  --mono-filter: grayscale(1) contrast(1.12) brightness(1.06) sepia(0.22) hue-rotate(158deg) saturate(0.32);
 }
 
-function tickClock() {
-  const d = new Date();
-  clockEl.textContent = `${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`;
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
 }
 
-function openLightbox(post) {
-  lbImg.src = post.image;
-  lbImg.alt = post.title;
-  lbTitle.textContent = post.title;
-  lbExcerpt.textContent = post.excerpt;
-  lightbox.hidden = false;
-  spawnSilverRibbons();
-  spawnDiamondEchoes(post.image);
-  document.body.style.overflow = "hidden";
-  lbClose.focus();
+html,
+body {
+  height: 100%;
+  margin: 0;
+  overflow: hidden;
+  font-family: "Noto Sans SC", "JetBrains Mono", system-ui, sans-serif;
+  color: var(--text);
+  background: var(--void);
 }
 
-function closeLightbox() {
-  lightbox.hidden = true;
-  document.body.style.overflow = "";
-  lbImg.removeAttribute("src");
-  lbRibbons.innerHTML = "";
-  lbDiamond.innerHTML = "";
+body {
+  position: relative;
 }
 
-function spawnSilverRibbons() {
-  lbRibbons.innerHTML = "";
-  const count = prefersReducedMotion ? 10 : 72;
-  for (let i = 0; i < count; i++) {
-    const ray = document.createElement("div");
-    ray.className = "lb-ray";
-    const deg = (360 / count) * i + (i % 3) * 0.35;
-    ray.style.setProperty("--deg", `${deg}deg`);
-    ray.style.animationDelay = `${(i / count) * 0.12}s`;
-    lbRibbons.appendChild(ray);
+/* —— 虚空：无数横线与竖线（多层景深） —— */
+.void-bg {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background: radial-gradient(ellipse 100% 70% at 50% 35%, #ffffff 0%, var(--void) 42%, var(--void-mid) 100%);
+}
+
+.line-field {
+  position: absolute;
+  inset: -30%;
+  pointer-events: none;
+}
+
+.line-field--far {
+  opacity: 0.35;
+  background-image:
+    repeating-linear-gradient(0deg, var(--line-faint) 0 1px, transparent 1px 17px),
+    repeating-linear-gradient(90deg, var(--line-faint) 0 1px, transparent 1px 19px);
+  transform: translateZ(0) scale(1.08);
+  animation: drift-far 38s linear infinite;
+}
+
+.line-field--mid {
+  opacity: 0.5;
+  background-image:
+    repeating-linear-gradient(0deg, transparent 0 11px, var(--line-mid) 11px 12px, transparent 12px 28px),
+    repeating-linear-gradient(90deg, transparent 0 13px, var(--line-mid) 13px 14px, transparent 14px 30px);
+  animation: drift-mid 52s linear infinite reverse;
+}
+
+.line-field--near {
+  opacity: 0.28;
+  background-image:
+    repeating-linear-gradient(0deg, rgba(255, 255, 255, 0.5) 0 1px, transparent 1px 9px),
+    repeating-linear-gradient(90deg, rgba(255, 255, 255, 0.45) 0 1px, transparent 1px 11px);
+  mix-blend-mode: soft-light;
+  animation: drift-near 28s linear infinite;
+}
+
+@keyframes drift-far {
+  to {
+    transform: translate(24px, 18px) scale(1.08);
   }
 }
 
-function spawnDiamondEchoes(activeSrc) {
-  lbDiamond.innerHTML = "";
-  const others = POSTS.filter((p) => p.image !== activeSrc);
-  const golden = 2.39996322972865332;
-  others.forEach((p, i) => {
-    const shell = document.createElement("div");
-    shell.className = "lb-diamond";
-    const img = document.createElement("img");
-    img.src = p.image;
-    img.alt = "";
-    img.loading = "eager";
-    shell.appendChild(img);
-
-    const ring = 1 + Math.floor(i / 6);
-    const t = i * golden;
-    const r = 22 + ring * 11 + (i % 4) * 2.5;
-    const dx = Math.cos(t) * r;
-    const dy = Math.sin(t) * r;
-    const dw = 72 + (i % 5) * 10;
-    const blurPx = 1.2 + ring * 0.85 + (i % 3) * 0.4;
-    const opacity = Math.max(0.08, 0.34 - ring * 0.06 - (i % 4) * 0.02);
-    const scale = 0.75 + (i % 4) * 0.07;
-
-    shell.style.setProperty("--dx", `${dx.toFixed(2)}vmin`);
-    shell.style.setProperty("--dy", `${dy.toFixed(2)}vmin`);
-    shell.style.setProperty("--dw", `${dw}px`);
-    shell.style.setProperty("--do", String(opacity));
-    shell.style.setProperty("--ds", scale.toFixed(2));
-    shell.style.setProperty("--db", `${blurPx}px`);
-    shell.style.animationDelay = `${i * 0.04}s`;
-
-    lbDiamond.appendChild(shell);
-  });
-}
-
-function buildCard(post) {
-  const card = document.createElement("div");
-  card.className = "card";
-  card.setAttribute("role", "button");
-  card.tabIndex = 0;
-  card.setAttribute("aria-label", `打开文章：${post.title}`);
-  card.innerHTML = `
-      <span class="card-index">${post.id}</span>
-      <div class="card-inner">
-        <img src="${post.image}" alt="" loading="lazy" decoding="async" />
-      </div>
-      <div class="card-label">${post.title}</div>
-    `;
-  const go = () => {
-    if (suppressCardClick) return;
-    openLightbox(post);
-  };
-  card.addEventListener("click", go);
-  card.addEventListener("keydown", (e) => {
-    if (e.key === "Enter" || e.key === " ") {
-      e.preventDefault();
-      go();
-    }
-  });
-  return card;
-}
-
-function buildEchoCell(post) {
-  const cell = document.createElement("div");
-  cell.className = "echo-cell";
-  const img = document.createElement("img");
-  img.src = post.image;
-  img.alt = "";
-  img.loading = "lazy";
-  img.decoding = "async";
-  cell.appendChild(img);
-  return cell;
-}
-
-function renderEchoLayers() {
-  echoStack.innerHTML = "";
-  echoInners = [];
-  ECHO_LAYERS.forEach((cfg, layerIdx) => {
-    const layer = document.createElement("div");
-    layer.className = "echo-layer";
-    layer.dataset.speed = String(cfg.speed);
-    layer.style.zIndex = String(layerIdx + 1);
-
-    const mesh = document.createElement("div");
-    mesh.className = "echo-mesh";
-    mesh.style.setProperty("--line-scale", String(cfg.lineScale));
-
-    const inner = document.createElement("div");
-    inner.className = "echo-layer-inner";
-    const w = cfg.cols * cfg.cell + (cfg.cols - 1) * cfg.gap;
-    const h = cfg.rows * cfg.cell + (cfg.rows - 1) * cfg.gap;
-    inner.style.width = `${w}px`;
-    inner.style.height = `${h}px`;
-
-    const grid = document.createElement("div");
-    grid.className = "echo-grid";
-    grid.style.gridTemplateColumns = `repeat(${cfg.cols}, ${cfg.cell}px)`;
-    grid.style.gap = `${cfg.gap}px`;
-    grid.style.setProperty("--echo-blur", `${cfg.blur}px`);
-    grid.style.setProperty("--echo-opacity", String(cfg.opacity));
-
-    const offset = layerIdx * 3 + 1;
-    for (let r = 0; r < cfg.rows; r++) {
-      for (let c = 0; c < cfg.cols; c++) {
-        const idx = (r * cfg.cols + c + offset) % POSTS.length;
-        grid.appendChild(buildEchoCell(POSTS[idx]));
-      }
-    }
-
-    inner.appendChild(mesh);
-    inner.appendChild(grid);
-    layer.appendChild(inner);
-    echoStack.appendChild(layer);
-    echoInners.push({ el: inner, cfg });
-  });
-}
-
-function renderPlane() {
-  plane.innerHTML = "";
-  plane.style.gridTemplateColumns = `repeat(${MAIN_COLS}, ${MAIN_CELL}px)`;
-  plane.style.gap = `${MAIN_GAP}px`;
-  plane.style.padding = "56px";
-
-  for (let r = 0; r < MAIN_ROWS; r++) {
-    for (let c = 0; c < MAIN_COLS; c++) {
-      const idx = (r * MAIN_COLS + c) % POSTS.length;
-      plane.appendChild(buildCard(POSTS[idx]));
-    }
+@keyframes drift-mid {
+  to {
+    transform: translate(-30px, -22px);
   }
 }
 
-function centerScroll() {
-  requestAnimationFrame(() => {
-    const maxX = scrollSurface.scrollWidth - scrollSurface.clientWidth;
-    const maxY = scrollSurface.scrollHeight - scrollSurface.clientHeight;
-    scrollSurface.scrollLeft = maxX > 0 ? maxX / 2 : 0;
-    scrollSurface.scrollTop = maxY > 0 ? maxY / 2 : 0;
-    syncEchoParallax();
-    updateDepth();
-  });
+@keyframes drift-near {
+  to {
+    transform: translate(14px, -26px);
+  }
 }
 
-function syncEchoParallax() {
-  const sl = scrollSurface.scrollLeft;
-  const st = scrollSurface.scrollTop;
-  const spd = prefersReducedMotion ? 0 : 1;
-  echoInners.forEach(({ el, cfg }) => {
-    const tx = cfg.phase[0] - sl * cfg.speed * spd;
-    const ty = cfg.phase[1] - st * cfg.speed * spd;
-    el.style.transform = `translate(calc(-50% + ${tx}px), calc(-50% + ${ty}px))`;
-  });
+.void-bloom {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at 50% 42%, rgba(255, 255, 255, 0.92) 0%, transparent 52%);
+  mix-blend-mode: screen;
 }
 
-function updateDepth() {
-  const maxX = scrollSurface.scrollWidth - scrollSurface.clientWidth || 1;
-  const maxY = scrollSurface.scrollHeight - scrollSurface.clientHeight || 1;
-  const nx = scrollSurface.scrollLeft / maxX;
-  const ny = scrollSurface.scrollTop / maxY;
-  depthVal.textContent = Math.hypot(nx, ny).toFixed(2);
-}
-
-function bindPan() {
-  let down = false;
-  let sx = 0;
-  let sy = 0;
-  let sl0 = 0;
-  let st0 = 0;
-  let moved = false;
-
-  scrollSurface.addEventListener("mousedown", (e) => {
-    if (e.button !== 0 || !lightbox.hidden) return;
-    down = true;
-    moved = false;
-    sx = e.clientX;
-    sy = e.clientY;
-    sl0 = scrollSurface.scrollLeft;
-    st0 = scrollSurface.scrollTop;
-    scrollSurface.classList.add("is-grabbing");
-  });
-
-  window.addEventListener("mousemove", (e) => {
-    if (!down) return;
-    const dx = e.clientX - sx;
-    const dy = e.clientY - sy;
-    if (Math.hypot(dx, dy) > 4) moved = true;
-    scrollSurface.scrollLeft = sl0 - dx;
-    scrollSurface.scrollTop = st0 - dy;
-  });
-
-  window.addEventListener("mouseup", () => {
-    if (!down) return;
-    down = false;
-    scrollSurface.classList.remove("is-grabbing");
-    if (moved) {
-      suppressCardClick = true;
-      setTimeout(() => {
-        suppressCardClick = false;
-      }, 80);
-    }
-  });
-
-  scrollSurface.addEventListener(
-    "wheel",
-    (e) => {
-      if (!lightbox.hidden) return;
-      if (e.shiftKey) {
-        e.preventDefault();
-        scrollSurface.scrollLeft += e.deltaY;
-      }
-    },
-    { passive: false }
+.void-scan {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    transparent 0%,
+    rgba(210, 240, 255, 0.05) 47%,
+    rgba(210, 240, 255, 0.11) 50%,
+    rgba(210, 240, 255, 0.05) 53%,
+    transparent 100%
   );
+  background-size: 100% 240%;
+  animation: scan 11s ease-in-out infinite;
+  opacity: 0.55;
 }
 
-lbClose.addEventListener("click", closeLightbox);
-lightbox.addEventListener("click", (e) => {
-  if (e.target === lightbox) closeLightbox();
-});
+@keyframes scan {
+  0%,
+  100% {
+    background-position: 0 -70%;
+  }
+  50% {
+    background-position: 0 70%;
+  }
+}
 
-document.addEventListener("keydown", (e) => {
-  if (e.key === "Escape" && !lightbox.hidden) closeLightbox();
-});
+.cursor-glow {
+  position: fixed;
+  width: 480px;
+  height: 480px;
+  margin: -240px 0 0 -240px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(170, 220, 255, 0.12) 0%, transparent 68%);
+  pointer-events: none;
+  z-index: 1;
+}
 
-document.addEventListener("mousemove", (e) => {
-  cursorGlow.style.transform = `translate(${e.clientX}px, ${e.clientY}px)`;
-});
+.hud-top {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 8;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  padding: 1.1rem 1.5rem;
+  font-family: "JetBrains Mono", monospace;
+  font-size: 0.68rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--text-soft);
+}
 
-scrollSurface.addEventListener("scroll", () => {
-  syncEchoParallax();
-  updateDepth();
-});
+.hud-brand {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+}
 
-window.addEventListener("resize", () => {
-  syncEchoParallax();
-  updateDepth();
-});
+.hud-mark {
+  color: var(--cyan);
+  font-size: 0.95rem;
+  text-shadow: 0 0 14px var(--cyan-soft);
+}
 
-tickClock();
-setInterval(tickClock, 1000);
-renderEchoLayers();
-renderPlane();
-bindPan();
-centerScroll();
+.hud-title {
+  font-size: 1rem;
+  font-weight: 500;
+  color: var(--text);
+  letter-spacing: 0.22em;
+}
+
+.hud-sub {
+  font-size: 0.62rem;
+  opacity: 0.78;
+}
+
+.hud-meta {
+  text-align: right;
+}
+
+.hud-meta .sep {
+  margin: 0 0.45rem;
+  opacity: 0.38;
+}
+
+.stage {
+  position: relative;
+  z-index: 2;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 4.5rem 0 3.5rem;
+  min-height: 0;
+}
+
+.intro-panel {
+  text-align: center;
+  padding: 0 1.25rem 0.75rem;
+  max-width: 34rem;
+  margin: 0 auto;
+}
+
+.intro-line {
+  margin: 0 0 0.4rem;
+  font-size: 0.88rem;
+  font-weight: 400;
+  color: var(--text-soft);
+  line-height: 1.55;
+}
+
+.intro-hint {
+  margin: 0;
+  font-family: "JetBrains Mono", monospace;
+  font-size: 0.62rem;
+  letter-spacing: 0.06em;
+  color: var(--cyan);
+  opacity: 0.82;
+}
+
+/* —— 一体平面：背后多层网格 + 前景可滚动无限画布 —— */
+.void-canvas {
+  position: relative;
+  flex: 1;
+  min-height: 0;
+  margin: 0 0.35rem 0.25rem;
+  border-radius: calc(var(--radius-card) + 4px);
+  overflow: hidden;
+  box-shadow:
+    0 0 0 1px rgba(200, 230, 255, 0.45),
+    0 18px 50px rgba(100, 150, 200, 0.12);
+}
+
+.echo-stack {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+.echo-layer {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+}
+
+.echo-layer-inner {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  will-change: transform;
+}
+
+.echo-mesh {
+  position: absolute;
+  inset: -80px;
+  z-index: 0;
+  --ls: var(--line-scale, 1);
+  background-image:
+    repeating-linear-gradient(
+      0deg,
+      rgba(150, 190, 220, 0.14) 0 1px,
+      transparent 1px calc(7px * var(--ls))
+    ),
+    repeating-linear-gradient(
+      90deg,
+      rgba(150, 190, 220, 0.12) 0 1px,
+      transparent 1px calc(9px * var(--ls))
+    ),
+    repeating-linear-gradient(
+      0deg,
+      transparent 0 calc(5px * var(--ls)),
+      rgba(255, 255, 255, 0.22) calc(5px * var(--ls)) calc(5px * var(--ls) + 1px),
+      transparent calc(5px * var(--ls) + 1px) calc(22px * var(--ls))
+    ),
+    repeating-linear-gradient(
+      90deg,
+      transparent 0 calc(6px * var(--ls)),
+      rgba(255, 255, 255, 0.18) calc(6px * var(--ls)) calc(6px * var(--ls) + 1px),
+      transparent calc(6px * var(--ls) + 1px) calc(26px * var(--ls))
+    );
+  opacity: 0.55;
+  mix-blend-mode: multiply;
+}
+
+.echo-grid {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  align-content: start;
+}
+
+.echo-cell {
+  position: relative;
+  aspect-ratio: 1;
+  border-radius: calc(var(--radius-inner) * 0.55);
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.42);
+  background: rgba(255, 255, 255, 0.18);
+  box-shadow:
+    0 0 0 1px rgba(180, 220, 255, 0.12),
+    inset 0 1px 0 rgba(255, 255, 255, 0.35);
+}
+
+.echo-cell img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  opacity: var(--echo-opacity, 0.28);
+  filter: var(--mono-filter) blur(var(--echo-blur, 1px));
+}
+
+.universe-window {
+  position: relative;
+  z-index: 4;
+  height: 100%;
+  min-height: min(48vh, 380px);
+  margin: 1px;
+  border-radius: calc(var(--radius-card) + 2px);
+  overflow: hidden;
+  mask-image: radial-gradient(ellipse 92% 88% at 50% 50%, #000 52%, transparent 100%);
+}
+
+.universe-scroll {
+  height: 100%;
+  overflow: auto;
+  overscroll-behavior: contain;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(74, 208, 255, 0.35) transparent;
+  cursor: grab;
+  -webkit-overflow-scrolling: touch;
+}
+
+.universe-scroll.is-grabbing {
+  cursor: grabbing;
+  user-select: none;
+}
+
+.universe-scroll::-webkit-scrollbar {
+  width: 5px;
+  height: 5px;
+}
+
+.universe-scroll::-webkit-scrollbar-thumb {
+  background: rgba(74, 208, 255, 0.38);
+  border-radius: 5px;
+}
+
+.universe-plane {
+  display: grid;
+  width: max-content;
+  min-width: 100%;
+  min-height: 100%;
+  box-sizing: content-box;
+  perspective: 1400px;
+}
+
+/* —— 卡片：强玻璃 + 大圆角 + 黑白青（主平面格子） —— */
+.card {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 1;
+  height: auto;
+  border-radius: var(--radius-card);
+  cursor: pointer;
+  transform-style: preserve-3d;
+  border: 1px solid rgba(255, 255, 255, 0.65);
+  background: var(--glass-bg);
+  backdrop-filter: blur(28px) saturate(1.65);
+  -webkit-backdrop-filter: blur(28px) saturate(1.65);
+  box-shadow:
+    0 0 0 1px rgba(180, 220, 255, 0.25),
+    0 4px 24px rgba(120, 170, 210, 0.12),
+    0 24px 48px rgba(100, 150, 200, 0.08),
+    inset 0 1px 0 rgba(255, 255, 255, 0.75),
+    inset 0 -1px 0 rgba(180, 210, 230, 0.35);
+  transition:
+    transform 0.5s cubic-bezier(0.22, 1, 0.36, 1),
+    box-shadow 0.4s ease,
+    border-color 0.35s ease;
+}
+
+.card::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  padding: 1px;
+  background: linear-gradient(145deg, rgba(255, 255, 255, 0.9), rgba(120, 200, 255, 0.25), rgba(255, 255, 255, 0.4));
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  pointer-events: none;
+}
+
+.card:hover,
+.card:focus-visible {
+  transform: translateZ(28px) scale(1.04);
+  border-color: rgba(255, 255, 255, 0.85);
+  box-shadow:
+    0 0 0 1px rgba(120, 210, 255, 0.55),
+    0 0 36px rgba(120, 210, 255, 0.28),
+    0 28px 56px rgba(90, 140, 190, 0.15),
+    inset 0 1px 0 rgba(255, 255, 255, 0.9);
+  outline: none;
+}
+
+.card:focus-visible {
+  outline: 2px solid var(--cyan);
+  outline-offset: 5px;
+}
+
+.card-inner {
+  position: absolute;
+  inset: 9px;
+  border-radius: var(--radius-inner);
+  overflow: hidden;
+  background: rgba(255, 255, 255, 0.2);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.25);
+}
+
+.card-inner img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  filter: var(--mono-filter);
+  transition: transform 0.55s ease, filter 0.35s ease;
+}
+
+.card:hover .card-inner img {
+  transform: scale(1.05);
+}
+
+.card-label {
+  position: absolute;
+  left: 10px;
+  right: 10px;
+  bottom: 9px;
+  padding: 0.32rem 0.5rem;
+  font-family: "JetBrains Mono", monospace;
+  font-size: 0.58rem;
+  letter-spacing: 0.05em;
+  color: var(--text);
+  border-radius: calc(var(--radius-inner) * 0.35);
+  background: rgba(255, 255, 255, 0.42);
+  backdrop-filter: blur(14px) saturate(1.4);
+  -webkit-backdrop-filter: blur(14px) saturate(1.4);
+  border: 1px solid rgba(255, 255, 255, 0.55);
+  line-height: 1.3;
+  box-shadow: 0 2px 12px rgba(100, 150, 190, 0.08);
+}
+
+.card-index {
+  position: absolute;
+  top: 10px;
+  right: 12px;
+  z-index: 1;
+  font-family: "JetBrains Mono", monospace;
+  font-size: 0.55rem;
+  color: var(--text-soft);
+  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.8);
+}
+
+.hud-bottom {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 8;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.65rem 1.25rem;
+  font-family: "JetBrains Mono", monospace;
+  font-size: 0.58rem;
+  letter-spacing: 0.12em;
+  color: var(--text-soft);
+  background: linear-gradient(180deg, transparent, rgba(255, 255, 255, 0.72));
+}
+
+.footer-quote {
+  flex: 1;
+  text-align: center;
+  font-family: "Noto Sans SC", sans-serif;
+  font-size: 0.74rem;
+  letter-spacing: 0.05em;
+  color: var(--text);
+  opacity: 0.86;
+}
+
+/* —— 灯箱：银线迸发 + 背后菱形 + 中央清晰 —— */
+.lightbox {
+  position: fixed;
+  inset: 0;
+  z-index: 30;
+  display: grid;
+  place-items: center;
+  padding: 1.5rem;
+  background: radial-gradient(ellipse 85% 75% at 50% 48%, #ffffff 0%, rgba(247, 251, 255, 0.97) 55%, var(--void-mid) 100%);
+  animation: lb-fade 0.4s ease forwards;
+}
+
+.lightbox[hidden] {
+  display: none;
+}
+
+@keyframes lb-fade {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.lb-grid-faint {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0.14;
+  background-image:
+    repeating-linear-gradient(0deg, rgba(150, 190, 220, 0.5) 0 1px, transparent 1px 22px),
+    repeating-linear-gradient(90deg, rgba(150, 190, 220, 0.45) 0 1px, transparent 1px 24px);
+}
+
+.lb-ribbons {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 0;
+  height: 0;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.lb-ray {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 2px;
+  height: 120vmin;
+  margin-left: -1px;
+  margin-top: -120vmin;
+  transform-origin: 50% 100%;
+  background: linear-gradient(
+    to top,
+    transparent 0%,
+    rgba(245, 248, 255, 0.15) 28%,
+    rgba(230, 236, 248, 0.95) 46%,
+    rgba(255, 255, 255, 0.75) 50%,
+    rgba(210, 218, 232, 0.85) 54%,
+    rgba(245, 248, 255, 0.12) 72%,
+    transparent 100%
+  );
+  filter: blur(0.35px);
+  opacity: 0;
+  transform: rotate(var(--deg, 0deg)) scaleY(0.02);
+  animation: ribbon-life 1.45s cubic-bezier(0.18, 0.82, 0.22, 1) forwards;
+}
+
+@keyframes ribbon-life {
+  0% {
+    opacity: 0;
+    transform: rotate(var(--deg, 0deg)) scaleY(0.02);
+  }
+  14% {
+    opacity: 1;
+  }
+  42% {
+    transform: rotate(var(--deg, 0deg)) scaleY(1);
+    opacity: 0.92;
+  }
+  68% {
+    opacity: 0.55;
+  }
+  100% {
+    opacity: 0;
+    transform: rotate(var(--deg, 0deg)) scaleY(1.04);
+  }
+}
+
+.lb-diamond-field {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  pointer-events: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.lb-diamond {
+  position: absolute;
+  width: var(--dw, 120px);
+  height: var(--dw, 120px);
+  border-radius: var(--radius-card);
+  overflow: hidden;
+  opacity: var(--do, 0.2);
+  transform: translate(var(--dx, 0), var(--dy, 0)) rotate(42deg) scale(var(--ds, 1));
+  filter: var(--mono-filter) blur(var(--db, 2px));
+  box-shadow: 0 8px 32px rgba(100, 140, 180, 0.12);
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  animation: diamond-drift 0.9s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.lb-diamond img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transform: rotate(-42deg) scale(1.12);
+}
+
+@keyframes diamond-drift {
+  from {
+    opacity: 0;
+    transform: translate(calc(var(--dx, 0) * 0.2), calc(var(--dy, 0) * 0.2)) rotate(42deg) scale(0.6);
+  }
+  to {
+    opacity: var(--do, 0.2);
+    transform: translate(var(--dx, 0), var(--dy, 0)) rotate(42deg) scale(var(--ds, 1));
+  }
+}
+
+.lightbox-close {
+  position: absolute;
+  top: 1rem;
+  right: 1.25rem;
+  z-index: 20;
+  width: 46px;
+  height: 46px;
+  border: 1px solid rgba(200, 220, 240, 0.7);
+  border-radius: calc(var(--radius-card) * 0.55);
+  background: rgba(255, 255, 255, 0.55);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  color: var(--text);
+  font-size: 1.45rem;
+  line-height: 1;
+  cursor: pointer;
+  transition: background 0.2s, box-shadow 0.2s;
+}
+
+.lightbox-close:hover {
+  background: rgba(255, 255, 255, 0.88);
+  box-shadow: 0 0 24px rgba(120, 200, 255, 0.25);
+}
+
+.lightbox-hero-wrap {
+  position: relative;
+  z-index: 10;
+  max-width: min(94vw, 920px);
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.lightbox-frame {
+  width: 100%;
+  max-width: min(92vw, 880px);
+  padding: 1.1rem 1.1rem 1rem;
+  border-radius: calc(var(--radius-card) + 6px);
+  border: 1px solid rgba(255, 255, 255, 0.6);
+  background: rgba(255, 255, 255, 0.22);
+  backdrop-filter: blur(32px) saturate(1.5);
+  -webkit-backdrop-filter: blur(32px) saturate(1.5);
+  box-shadow:
+    0 0 0 1px rgba(200, 230, 255, 0.35),
+    0 24px 80px rgba(80, 130, 180, 0.12),
+    inset 0 1px 0 rgba(255, 255, 255, 0.85);
+  animation: lb-pop 0.65s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+@keyframes lb-pop {
+  from {
+    opacity: 0;
+    transform: scale(0.82) translateY(24px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+.lightbox-img-shell {
+  border-radius: var(--radius-card);
+  overflow: hidden;
+  background: #fff;
+  box-shadow:
+    0 12px 48px rgba(60, 100, 140, 0.14),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.8);
+}
+
+.lightbox-img {
+  display: block;
+  width: 100%;
+  max-height: min(64vh, 680px);
+  height: auto;
+  object-fit: contain;
+  margin: 0 auto;
+  border-radius: var(--radius-card);
+  filter: contrast(1.04) saturate(1.06);
+}
+
+.lightbox-caption {
+  margin-top: 0.85rem;
+  padding: 0 0.25rem;
+}
+
+.lightbox-caption h2 {
+  margin: 0 0 0.3rem;
+  font-size: 1.05rem;
+  font-weight: 500;
+}
+
+.lightbox-caption p {
+  margin: 0;
+  font-size: 0.84rem;
+  color: var(--text-soft);
+  line-height: 1.55;
+}
+
+@media (max-width: 640px) {
+  .hud-top {
+    flex-direction: column;
+    gap: 0.6rem;
+  }
+
+  .hud-meta {
+    text-align: left;
+  }
+
+  .void-canvas {
+    margin: 0 0.15rem;
+  }
+
+  .universe-window {
+    min-height: min(42vh, 320px);
+  }
+
+  .hud-bottom {
+    flex-wrap: wrap;
+    gap: 0.3rem;
+    justify-content: center;
+  }
+
+  .footer-quote {
+    order: 3;
+    flex-basis: 100%;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .line-field--far,
+  .line-field--mid,
+  .line-field--near,
+  .void-scan {
+    animation: none;
+  }
+
+  .lb-ray {
+    animation: ribbon-life 0.35s ease-out forwards;
+  }
+
+  .lb-diamond {
+    animation: none;
+    opacity: var(--do, 0.18);
+  }
+
+  .lightbox-frame {
+    animation: none;
+  }
+}
