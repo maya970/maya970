@@ -295,7 +295,6 @@ body {
 
 .cross-depth-shift {
   position: absolute;
-  inset: 0;
   will-change: transform;
   transform-style: preserve-3d;
 }
