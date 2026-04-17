@@ -244,7 +244,7 @@ body {
   margin: 1px;
   border-radius: calc(var(--radius-card) + 2px);
   overflow: hidden;
-  mask-image: radial-gradient(ellipse 92% 88% at 50% 50%, #000 52%, transparent 100%);
+  mask-image: radial-gradient(ellipse 98% 96% at 50% 50%, #000 78%, transparent 100%);
 }
 
 .universe-scroll {
@@ -275,7 +275,8 @@ body {
 .universe-plane {
   position: relative;
   box-sizing: border-box;
-  perspective: 1600px;
+  perspective: 1100px;
+  perspective-origin: 50% 42%;
 }
 
 .cross-origin {
@@ -299,6 +300,26 @@ body {
   transform-style: preserve-3d;
 }
 
+.cross-depth-body {
+  position: absolute;
+  inset: 0;
+  transform-style: preserve-3d;
+}
+
+/* 与前景套成「口」字框：越远框越大、越亮，层次更明显 */
+.depth-portal {
+  position: absolute;
+  inset: calc(-1 * var(--portal-out, 28px));
+  z-index: 4;
+  pointer-events: none;
+  border-radius: calc(var(--radius-card) + 10px);
+  border: var(--portal-bw, 2px) solid rgba(74, 208, 255, var(--portal-alpha, 0.45));
+  box-shadow:
+    inset 0 0 0 1px rgba(255, 255, 255, 0.22),
+    inset 0 0 32px rgba(200, 235, 255, 0.08),
+    0 0 36px rgba(90, 200, 255, 0.14);
+}
+
 .cross-mesh {
   position: absolute;
   left: 50%;
@@ -309,6 +330,7 @@ body {
   transform: translate(-50%, -50%);
   --ls: var(--line-scale, 1);
   pointer-events: none;
+  will-change: opacity;
   background-image:
     repeating-linear-gradient(
       0deg,
@@ -349,6 +371,10 @@ body {
 
 .cross-depth:not(.cross-depth--back) .card {
   pointer-events: auto;
+}
+
+.cross-depth--back .card-inner img {
+  opacity: 0.94;
 }
 
 /* —— 卡片：强玻璃 + 大圆角 + 黑白青 —— */
