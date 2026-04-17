@@ -10,9 +10,10 @@
   --tape-edge: rgba(255, 255, 255, 0.38);
   --text: #dce6f5;
   --text-muted: #7a8aa8;
-  --glass-tint: rgba(12, 22, 42, 0.45);
-  --glass-highlight: rgba(255, 255, 255, 0.22);
-  --glass-edge: rgba(255, 255, 255, 0.14);
+  --glass-tint: rgba(10, 18, 36, 0.28);
+  --glass-highlight: rgba(255, 255, 255, 0.28);
+  --glass-edge: rgba(255, 255, 255, 0.22);
+  --glass-air: rgba(255, 255, 255, 0.06);
   --ease-spring: cubic-bezier(0.34, 1.35, 0.64, 1);
   --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
 }
@@ -27,7 +28,9 @@ html,
 body {
   margin: 0;
   min-height: 100%;
-  background: var(--void-deep);
+  background:
+    radial-gradient(ellipse 100% 80% at 50% 100%, rgba(20, 40, 72, 0.35), transparent 55%),
+    var(--void-deep);
   color: var(--text);
   font-family: "Noto Sans SC", "JetBrains Mono", system-ui, sans-serif;
   overflow-x: hidden;
@@ -37,17 +40,18 @@ body {
 .glass-plate {
   position: relative;
   background:
-    linear-gradient(155deg, rgba(255, 255, 255, 0.14) 0%, rgba(255, 255, 255, 0.02) 42%, transparent 62%),
-    linear-gradient(225deg, rgba(122, 239, 255, 0.06) 0%, transparent 55%),
+    linear-gradient(155deg, rgba(255, 255, 255, 0.2) 0%, rgba(255, 255, 255, 0.04) 38%, transparent 58%),
+    linear-gradient(225deg, rgba(122, 239, 255, 0.1) 0%, transparent 50%),
+    var(--glass-air),
     var(--glass-tint);
-  backdrop-filter: blur(22px) saturate(165%);
-  -webkit-backdrop-filter: blur(22px) saturate(165%);
+  backdrop-filter: blur(28px) saturate(140%);
+  -webkit-backdrop-filter: blur(28px) saturate(140%);
   border: 1px solid var(--glass-edge);
   box-shadow:
-    0 0 0 1px rgba(0, 0, 0, 0.45) inset,
-    0 1px 0 rgba(255, 255, 255, 0.12) inset,
-    0 -18px 48px rgba(0, 0, 0, 0.35) inset,
-    0 28px 90px rgba(0, 0, 0, 0.55);
+    0 0 0 1px rgba(0, 0, 0, 0.35) inset,
+    0 1px 0 rgba(255, 255, 255, 0.22) inset,
+    0 -28px 60px rgba(0, 0, 0, 0.25) inset,
+    0 32px 100px rgba(0, 0, 0, 0.4);
 }
 
 .glass-plate--hud {
@@ -89,7 +93,7 @@ body {
   height: 100%;
   z-index: 0;
   pointer-events: none;
-  opacity: 0.92;
+  opacity: 0.78;
 }
 
 .ambient {
@@ -126,7 +130,7 @@ body {
   inset: 0;
   z-index: 1;
   pointer-events: none;
-  background: radial-gradient(ellipse 80% 70% at 50% 50%, transparent 30%, rgba(2, 3, 10, 0.55) 100%);
+  background: radial-gradient(ellipse 85% 75% at 50% 48%, transparent 42%, rgba(2, 3, 12, 0.38) 100%);
 }
 
 .hud {
@@ -287,6 +291,7 @@ body {
   overflow: hidden;
   position: relative;
   z-index: 1;
+  background: linear-gradient(180deg, rgba(4, 10, 22, 0.12), rgba(4, 10, 22, 0.02));
 }
 
 .feed-scene.is-dragging {
@@ -345,12 +350,13 @@ body {
   overflow: visible;
   border-radius: 6px;
   transform-style: preserve-3d;
+  pointer-events: auto;
   background:
-    linear-gradient(120deg, rgba(255, 255, 255, 0.06) 0%, transparent 55%),
-    rgba(6, 12, 26, 0.35);
-  backdrop-filter: blur(16px) saturate(150%);
-  -webkit-backdrop-filter: blur(16px) saturate(150%);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+    linear-gradient(120deg, rgba(255, 255, 255, 0.12) 0%, transparent 50%),
+    rgba(6, 14, 30, 0.22);
+  backdrop-filter: blur(20px) saturate(130%);
+  -webkit-backdrop-filter: blur(20px) saturate(130%);
+  border: 1px solid rgba(255, 255, 255, 0.16);
   box-shadow:
     0 0 0 1px rgba(0, 0, 0, 0.35) inset,
     0 1px 0 rgba(255, 255, 255, 0.1) inset,
@@ -401,7 +407,7 @@ body {
 
 .photo-frame--list {
   padding: 6px;
-  background: linear-gradient(145deg, rgba(255, 255, 255, 0.1), rgba(20, 35, 60, 0.5));
+  background: linear-gradient(145deg, rgba(255, 255, 255, 0.14), rgba(20, 40, 70, 0.28));
 }
 
 .photo-frame--modal {
@@ -424,7 +430,7 @@ body {
   position: absolute;
   inset: 5px;
   border-radius: 2px;
-  background: linear-gradient(180deg, rgba(8, 14, 28, 0.55), rgba(4, 8, 18, 0.75));
+  background: linear-gradient(180deg, rgba(8, 14, 28, 0.28), rgba(4, 8, 18, 0.42));
   pointer-events: none;
 }
 
@@ -448,8 +454,43 @@ body {
   border-radius: 2px;
   overflow: hidden;
   aspect-ratio: 4 / 3;
-  border: 1px solid rgba(0, 0, 0, 0.45);
-  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.06) inset;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  box-shadow:
+    0 0 0 1px rgba(0, 0, 0, 0.35) inset,
+    0 12px 40px rgba(0, 0, 0, 0.35);
+  isolation: isolate;
+}
+
+/* 图像如玻璃：低饱和、略压暗，再叠一层冷色「不是黑白」的着色 */
+.photo-frame__img-slot::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  background: linear-gradient(
+    118deg,
+    rgba(160, 220, 255, 0.22) 0%,
+    transparent 42%,
+    transparent 58%,
+    rgba(190, 170, 255, 0.12) 100%
+  );
+  mix-blend-mode: color;
+  opacity: 0.85;
+  pointer-events: none;
+}
+
+.photo-frame__img-slot::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 4;
+  border-radius: inherit;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.08), rgba(4, 12, 28, 0.18));
+  backdrop-filter: blur(3px) saturate(0.72) brightness(1.05);
+  -webkit-backdrop-filter: blur(3px) saturate(0.72) brightness(1.05);
+  mix-blend-mode: soft-light;
+  opacity: 0.92;
+  pointer-events: none;
 }
 
 .photo-frame--modal .photo-frame__img-slot {
@@ -485,12 +526,15 @@ body {
   opacity: 0.65;
 }
 
-.feed__thumb {
+.feed__thumb,
+.lightbox__img {
   width: 100%;
   height: 100%;
   object-fit: cover;
   display: block;
-  filter: saturate(0.95) contrast(1.06) brightness(1.02);
+  position: relative;
+  z-index: 1;
+  filter: saturate(0.38) contrast(1.14) brightness(1.05);
   transition: transform 0.55s var(--ease-out);
 }
 
@@ -565,9 +609,9 @@ body {
   display: grid;
   place-items: center;
   padding: clamp(1rem, 4vw, 2rem);
-  background: rgba(1, 2, 6, 0.55);
-  backdrop-filter: blur(14px) saturate(140%);
-  -webkit-backdrop-filter: blur(14px) saturate(140%);
+  background: rgba(1, 3, 10, 0.32);
+  backdrop-filter: blur(18px) saturate(120%);
+  -webkit-backdrop-filter: blur(18px) saturate(120%);
   opacity: 0;
   pointer-events: none;
   transition: opacity 0.45s var(--ease-out);
@@ -750,21 +794,15 @@ body {
   padding: 1rem 1rem 0;
 }
 
-.lightbox__img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  display: block;
-}
 
 .lightbox__meta {
   padding: 1.2rem 1.4rem 1.45rem;
   position: relative;
   z-index: 6;
-  border-top: 1px solid rgba(255, 255, 255, 0.08);
-  background: linear-gradient(180deg, rgba(8, 14, 28, 0.4), rgba(4, 8, 18, 0.75));
-  backdrop-filter: blur(18px) saturate(150%);
-  -webkit-backdrop-filter: blur(18px) saturate(150%);
+  border-top: 1px solid rgba(255, 255, 255, 0.12);
+  background: linear-gradient(180deg, rgba(8, 16, 32, 0.28), rgba(4, 10, 22, 0.52));
+  backdrop-filter: blur(22px) saturate(130%);
+  -webkit-backdrop-filter: blur(22px) saturate(130%);
 }
 
 .lightbox__title {
