@@ -11,9 +11,11 @@
 </head>
 <body>
   <canvas id="void-canvas" aria-hidden="true"></canvas>
+  <div class="ambient" aria-hidden="true"></div>
   <div class="grid-floor" aria-hidden="true"></div>
+  <div class="depth-fog" aria-hidden="true"></div>
 
-  <header class="hud">
+  <header class="hud glass-plate glass-plate--hud">
     <div class="hud__brand">
       <span class="hud__glyph">◇</span>
       <span class="hud__title">VOID.LOG</span>
@@ -22,12 +24,12 @@
   </header>
 
   <main class="stage">
-    <aside class="figure" aria-hidden="true">
+    <aside class="figure glass-plate glass-plate--figure" aria-hidden="true">
       <svg class="figure__svg" viewBox="0 0 120 280" fill="none" xmlns="http://www.w3.org/2000/svg">
         <defs>
           <linearGradient id="fg" x1="0%" y1="0%" x2="100%" y2="100%">
-            <stop offset="0%" stop-color="rgba(120,220,255,0.9)" />
-            <stop offset="100%" stop-color="rgba(60,100,200,0.35)" />
+            <stop offset="0%" stop-color="rgba(180, 240, 255, 0.95)" />
+            <stop offset="100%" stop-color="rgba(80, 140, 220, 0.4)" />
           </linearGradient>
         </defs>
         <ellipse cx="60" cy="38" rx="18" ry="22" stroke="url(#fg)" stroke-width="1.2" />
@@ -38,21 +40,48 @@
 
     <section class="feed-wrap">
       <p class="feed-hint">滚动或拖拽列表 · 点击进入</p>
-      <div class="feed-scene" id="feed-scene">
-        <ul class="feed" id="feed" role="list"></ul>
+      <div class="feed-scene glass-plate glass-plate--stage" id="feed-scene">
+        <div class="feed-scene__inner">
+          <ul class="feed" id="feed" role="list"></ul>
+        </div>
+        <div class="feed-scene__edge feed-scene__edge--top" aria-hidden="true"></div>
+        <div class="feed-scene__edge feed-scene__edge--bottom" aria-hidden="true"></div>
       </div>
     </section>
   </main>
 
   <div class="lightbox" id="lightbox" hidden aria-modal="true" role="dialog">
-    <button type="button" class="lightbox__close" id="lb-close" aria-label="关闭">×</button>
-    <div class="lightbox__frame">
-      <div class="lightbox__scan"></div>
-      <img class="lightbox__img" id="lb-img" alt="" />
-      <div class="lightbox__meta">
-        <h2 class="lightbox__title" id="lb-title"></h2>
-        <time class="lightbox__time" id="lb-time"></time>
-        <p class="lightbox__body" id="lb-body"></p>
+    <button type="button" class="lightbox__close glass-plate" id="lb-close" aria-label="关闭">×</button>
+    <div class="lightbox__center">
+      <div class="lightbox__tapes" id="lb-tapes" aria-hidden="true">
+        <span class="lightbox__tape"></span>
+        <span class="lightbox__tape"></span>
+        <span class="lightbox__tape"></span>
+        <span class="lightbox__tape"></span>
+        <span class="lightbox__tape"></span>
+        <span class="lightbox__tape"></span>
+        <span class="lightbox__tape"></span>
+      </div>
+      <div class="lightbox__frame glass-plate glass-plate--modal" id="lb-frame">
+        <div class="lightbox__frame-rim" aria-hidden="true"></div>
+        <div class="lightbox__scan"></div>
+        <div class="lightbox__photo-block">
+          <div class="photo-frame photo-frame--modal">
+            <div class="photo-frame__chamfer" aria-hidden="true"></div>
+            <div class="photo-frame__matte" aria-hidden="true"></div>
+            <div class="photo-frame__glass-skin" aria-hidden="true"></div>
+            <div class="photo-frame__img-slot">
+              <img class="lightbox__img" id="lb-img" alt="" />
+            </div>
+            <div class="photo-frame__specular" aria-hidden="true"></div>
+            <div class="photo-frame__corners" aria-hidden="true"></div>
+          </div>
+        </div>
+        <div class="lightbox__meta glass-plate glass-plate--meta">
+          <h2 class="lightbox__title" id="lb-title"></h2>
+          <time class="lightbox__time" id="lb-time"></time>
+          <p class="lightbox__body" id="lb-body"></p>
+        </div>
       </div>
     </div>
   </div>
