@@ -59,6 +59,7 @@
   const lbBody = document.getElementById("lb-body");
   const lbClose = document.getElementById("lb-close");
 
+  let tapeTimer = null;
   let offsetY = 0;
   let velY = 0;
   let minY = 0;
@@ -114,19 +115,49 @@
     lbTitle.textContent = post.title;
     lbTime.textContent = post.time;
     lbBody.textContent = post.body;
+
+    if (tapeTimer) {
+      clearTimeout(tapeTimer);
+      tapeTimer = null;
+    }
+
     lightbox.hidden = false;
-    requestAnimationFrame(() => lightbox.classList.add("is-open"));
+    lightbox.classList.remove("is-open", "tape-run");
+    void lightbox.offsetWidth;
+
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        lightbox.classList.add("is-open", "tape-run");
+        tapeTimer = window.setTimeout(() => {
+          lightbox.classList.remove("tape-run");
+          tapeTimer = null;
+        }, 1180);
+      });
+    });
     document.body.style.overflow = "hidden";
   }
 
   function closeLightbox() {
-    lightbox.classList.remove("is-open");
+    if (tapeTimer) {
+      clearTimeout(tapeTimer);
+      tapeTimer = null;
+    }
+    lightbox.classList.remove("is-open", "tape-run");
     document.body.style.overflow = "";
-    const done = () => {
+    let settled = false;
+    const finish = () => {
+      if (settled) return;
+      settled = true;
       lightbox.hidden = true;
-      lightbox.removeEventListener("transitionend", done);
+      lightbox.removeEventListener("transitionend", onEnd);
+      window.clearTimeout(fallback);
     };
-    lightbox.addEventListener("transitionend", done);
+    const onEnd = (e) => {
+      if (e.target !== lightbox) return;
+      finish();
+    };
+    const fallback = window.setTimeout(finish, 700);
+    lightbox.addEventListener("transitionend", onEnd);
   }
 
   posts.forEach((post) => {
@@ -134,9 +165,16 @@
     li.className = "feed__item";
     li.innerHTML = `
       <button type="button" class="feed__card" data-id="${post.id}">
-        <div class="feed__thumb-wrap">
-          <img class="feed__thumb" src="${post.image}" alt="" loading="lazy" width="280" height="210" />
-          <div class="feed__thumb-glitch" aria-hidden="true"></div>
+        <div class="photo-frame photo-frame--list">
+          <div class="photo-frame__chamfer" aria-hidden="true"></div>
+          <div class="photo-frame__matte" aria-hidden="true"></div>
+          <div class="photo-frame__glass-skin" aria-hidden="true"></div>
+          <div class="photo-frame__img-slot">
+            <img class="feed__thumb" src="${post.image}" alt="" loading="lazy" width="280" height="210" />
+            <div class="feed__thumb-glitch" aria-hidden="true"></div>
+          </div>
+          <div class="photo-frame__specular" aria-hidden="true"></div>
+          <div class="photo-frame__corners" aria-hidden="true"></div>
         </div>
         <div class="feed__info">
           <span class="feed__time">${post.time}</span>
