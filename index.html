@@ -24,7 +24,7 @@
     <div class="hud-brand">
       <span class="hud-mark">◇</span>
       <span class="hud-title">VOID.LOG</span>
-      <span class="hud-sub">无限平面 / 重复网格</span>
+      <span class="hud-sub">五层十字 / 横竖单列</span>
     </div>
     <div class="hud-meta">
       <span id="clock">--:--:--</span>
@@ -35,14 +35,13 @@
 
   <main class="stage">
     <section class="intro-panel">
-      <p class="intro-line">整张「画布」比视窗大得多：横竖是同一张无限网格，四面都可以滑，图案重复延伸。</p>
-      <p class="intro-hint">拖曳平移 · 滚轮上下 · Shift+滚轮左右 · 点格打开 · Esc 关闭</p>
+      <p class="intro-line">只有一条横向图带和一条纵向图带相交成十字，四角没有格子。五层同样的十字叠在前后，带视差。</p>
+      <p class="intro-hint">拖曳平移 · 滚轮上下 · Shift+滚轮左右 · 仅最前一层可点 · Esc 关闭灯箱</p>
     </section>
 
     <div class="void-canvas" id="voidCanvas">
-      <div class="echo-stack" id="echoStack" aria-hidden="true"></div>
       <div class="universe-window">
-        <div class="universe-scroll" id="scrollSurface" role="region" aria-label="无限图像平面">
+        <div class="universe-scroll" id="scrollSurface" role="region" aria-label="虚空画布">
           <div class="universe-plane" id="plane"></div>
         </div>
       </div>
