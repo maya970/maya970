@@ -14,19 +14,19 @@ const POSTS = [
   { id: "10", title: "虚空界面 · 采样 J", excerpt: "点击展开中央大图。", image: "./10.png" },
 ];
 
-/** 十字：中心左右各 ARM 格；竖条不含中心格（避免与横条重复） */
-const ARM = 4;
-const CELL = 90;
-const GAP = 10;
-const PLANE_PAD = 420;
+const PLANE_PAD = 200;
+/** 环状周期 = 单块版图边长 + 缝；与 2×2 平铺一致 */
+const TILE_VOID = 260;
 
-/** 五层十字由后往前：缩放、模糊、透明度、视差系数、线网疏密 */
+/**
+ * 五层：格数、格子大小、错位、旋转、缩放、模糊…均不同，前后交错，不完全重叠。
+ */
 const CROSS_LAYERS = [
-  { scale: 0.74, blur: 3.2, opacity: 0.4, speed: 0.055, lineScale: 1.55, phase: [18, -12] },
-  { scale: 0.82, blur: 2.4, opacity: 0.5, speed: 0.09, lineScale: 1.25, phase: [-22, 16] },
-  { scale: 0.9, blur: 1.7, opacity: 0.62, speed: 0.13, lineScale: 1, phase: [10, 24] },
-  { scale: 0.96, blur: 1, opacity: 0.78, speed: 0.17, lineScale: 0.82, phase: [-14, -20] },
-  { scale: 1, blur: 0, opacity: 1, speed: 0.21, lineScale: 0.68, phase: [0, 0], interactive: true },
+  { arm: 6, cell: 62, gap: 8, scale: 0.64, offsetX: -26, offsetY: 16, rot: -1.15, blur: 3.5, opacity: 0.32, speed: 0.048, lineScale: 1.58, phase: [10, -8] },
+  { arm: 5, cell: 70, gap: 9, scale: 0.76, offsetX: 22, offsetY: -22, rot: 0.95, blur: 2.55, opacity: 0.42, speed: 0.085, lineScale: 1.22, phase: [-16, 12] },
+  { arm: 5, cell: 76, gap: 9, scale: 0.84, offsetX: -12, offsetY: -10, rot: -0.62, blur: 1.75, opacity: 0.54, speed: 0.12, lineScale: 0.98, phase: [18, -14] },
+  { arm: 4, cell: 84, gap: 10, scale: 0.93, offsetX: 16, offsetY: 20, rot: 0.5, blur: 0.9, opacity: 0.72, speed: 0.155, lineScale: 0.8, phase: [-10, 20] },
+  { arm: 4, cell: 90, gap: 10, scale: 1, offsetX: 0, offsetY: 0, rot: 0, blur: 0, opacity: 1, speed: 0.19, lineScale: 0.66, phase: [0, 0], interactive: true },
 ];
 
 const scrollSurface = document.getElementById("scrollSurface");
@@ -44,10 +44,25 @@ const clockEl = document.getElementById("clock");
 
 const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
-const pitch = CELL + GAP;
-const crossSpan = (2 * ARM + 1) * pitch;
 let crossShifts = [];
 let suppressCardClick = false;
+let torusTile = 900;
+
+function layerSpanPx(cfg) {
+  const pitch = cfg.cell + cfg.gap;
+  return (2 * cfg.arm + 1) * pitch;
+}
+
+function computeMaxOriginBox() {
+  let m = 0;
+  CROSS_LAYERS.forEach((cfg) => {
+    const s = layerSpanPx(cfg);
+    const ox = Math.abs(cfg.offsetX);
+    const oy = Math.abs(cfg.offsetY);
+    m = Math.max(m, s + 2 * ox, s + 2 * oy);
+  });
+  return Math.ceil(m + 24);
+}
 
 function pad(n) {
   return String(n).padStart(2, "0");
@@ -127,11 +142,11 @@ function spawnDiamondEchoes(activeSrc) {
 }
 
 function buildCard(post, opts) {
-  const { compact, interactive } = opts;
+  const { compact, interactive, cell } = opts;
   const card = document.createElement("div");
   card.className = compact ? "card card--depth" : "card";
-  card.style.width = `${CELL}px`;
-  card.style.height = `${CELL}px`;
+  card.style.width = `${cell}px`;
+  card.style.height = `${cell}px`;
   card.style.position = "absolute";
   if (!interactive) {
     card.setAttribute("aria-hidden", "true");
@@ -180,29 +195,30 @@ function postAt(layerIdx, hx, hy) {
   return POSTS[((k % POSTS.length) + POSTS.length) % POSTS.length];
 }
 
-function fillCrossArm(shift, layerIdx, interactive) {
+function fillCrossArm(shift, cfg, layerIdx, interactive) {
   const armH = document.createElement("div");
   armH.className = "cross-arm cross-arm--h";
   const armV = document.createElement("div");
   armV.className = "cross-arm cross-arm--v";
 
-  const cx = crossSpan / 2;
-  const cy = crossSpan / 2;
+  const pitch = cfg.cell + cfg.gap;
+  const box = layerSpanPx(cfg);
+  const cx = box / 2;
+  const cy = box / 2;
+  const half = cfg.cell / 2;
 
-  const half = CELL / 2;
-
-  for (let x = -ARM; x <= ARM; x++) {
+  for (let x = -cfg.arm; x <= cfg.arm; x++) {
     const p = postAt(layerIdx, x, 0);
-    const c = buildCard(p, { compact: !interactive, interactive });
+    const c = buildCard(p, { compact: !interactive, interactive, cell: cfg.cell });
     c.style.left = `${cx + x * pitch - half}px`;
     c.style.top = `${cy - half}px`;
     armH.appendChild(c);
   }
 
-  for (let y = -ARM; y <= ARM; y++) {
+  for (let y = -cfg.arm; y <= cfg.arm; y++) {
     if (y === 0) continue;
     const p = postAt(layerIdx, 0, y);
-    const c = buildCard(p, { compact: !interactive, interactive });
+    const c = buildCard(p, { compact: !interactive, interactive, cell: cfg.cell });
     c.style.left = `${cx - half}px`;
     c.style.top = `${cy + y * pitch - half}px`;
     armV.appendChild(c);
@@ -212,22 +228,13 @@ function fillCrossArm(shift, layerIdx, interactive) {
   shift.appendChild(armV);
 }
 
-function renderPlane() {
-  plane.innerHTML = "";
-  crossShifts = [];
-
-  const W = PLANE_PAD * 2 + crossSpan;
-  const H = PLANE_PAD * 2 + crossSpan;
-  plane.style.width = `${W}px`;
-  plane.style.height = `${H}px`;
-  plane.style.position = "relative";
-
+function buildOneOrigin(maxSpan) {
   const origin = document.createElement("div");
   origin.className = "cross-origin";
-  origin.style.left = `${PLANE_PAD}px`;
-  origin.style.top = `${PLANE_PAD}px`;
-  origin.style.width = `${crossSpan}px`;
-  origin.style.height = `${crossSpan}px`;
+  origin.style.width = `${maxSpan}px`;
+  origin.style.height = `${maxSpan}px`;
+
+  const shifts = [];
 
   CROSS_LAYERS.forEach((cfg, layerIdx) => {
     const depth = document.createElement("div");
@@ -235,30 +242,73 @@ function renderPlane() {
     depth.style.zIndex = String(layerIdx + 1);
     if (!cfg.interactive) depth.classList.add("cross-depth--back");
 
+    const layerBox = layerSpanPx(cfg);
     const mesh = document.createElement("div");
     mesh.className = "cross-mesh";
     mesh.style.setProperty("--line-scale", String(cfg.lineScale));
-    mesh.style.setProperty("--arm", String(ARM));
-    mesh.style.setProperty("--pitch", `${pitch}px`);
+    mesh.style.setProperty("--arm", String(cfg.arm));
+    mesh.style.setProperty("--pitch", `${cfg.cell + cfg.gap}px`);
 
     const shift = document.createElement("div");
     shift.className = "cross-depth-shift";
-    shift.style.setProperty("--arm", String(ARM));
-    shift.style.setProperty("--pitch", `${pitch}px`);
+    shift.style.setProperty("--arm", String(cfg.arm));
+    shift.style.setProperty("--pitch", `${cfg.cell + cfg.gap}px`);
     shift.style.transformOrigin = "50% 50%";
     shift.style.filter = cfg.blur > 0 ? `blur(${cfg.blur}px)` : "none";
     shift.style.opacity = String(cfg.opacity);
+    shift.style.width = `${layerBox}px`;
+    shift.style.height = `${layerBox}px`;
+    shift.style.left = `${(maxSpan - layerBox) / 2 + cfg.offsetX}px`;
+    shift.style.top = `${(maxSpan - layerBox) / 2 + cfg.offsetY}px`;
 
     shift.appendChild(mesh);
-    fillCrossArm(shift, layerIdx, !!cfg.interactive);
+    fillCrossArm(shift, cfg, layerIdx, !!cfg.interactive);
 
     depth.appendChild(shift);
     origin.appendChild(depth);
 
-    crossShifts.push({ el: shift, cfg });
+    shifts.push({ el: shift, cfg });
   });
 
-  plane.appendChild(origin);
+  return { origin, shifts };
+}
+
+function applyTorusWrap() {
+  if (!lightbox.hidden) return;
+  const TILE = torusTile;
+  if (TILE <= 1) return;
+  const sl = scrollSurface.scrollLeft;
+  const st = scrollSurface.scrollTop;
+  const nsl = ((sl % TILE) + TILE) % TILE;
+  const nst = ((st % TILE) + TILE) % TILE;
+  if (Math.abs(nsl - sl) > 0.5 || Math.abs(nst - st) > 0.5) {
+    scrollSurface.scrollLeft = nsl;
+    scrollSurface.scrollTop = nst;
+  }
+}
+
+function renderPlane() {
+  plane.innerHTML = "";
+  crossShifts = [];
+
+  const maxSpan = computeMaxOriginBox();
+  torusTile = maxSpan + TILE_VOID;
+
+  const planeW = PLANE_PAD * 2 + torusTile * 2;
+  const planeH = PLANE_PAD * 2 + torusTile * 2;
+  plane.style.width = `${planeW}px`;
+  plane.style.height = `${planeH}px`;
+  plane.style.position = "relative";
+
+  for (let i = 0; i < 2; i++) {
+    for (let j = 0; j < 2; j++) {
+      const { origin, shifts } = buildOneOrigin(maxSpan);
+      origin.style.left = `${PLANE_PAD + i * torusTile}px`;
+      origin.style.top = `${PLANE_PAD + j * torusTile}px`;
+      plane.appendChild(origin);
+      crossShifts.push(...shifts);
+    }
+  }
 }
 
 function syncCrossParallax() {
@@ -268,26 +318,27 @@ function syncCrossParallax() {
   crossShifts.forEach(({ el, cfg }) => {
     const tx = cfg.phase[0] - sl * cfg.speed * spd;
     const ty = cfg.phase[1] - st * cfg.speed * spd;
-    el.style.transform = `translate(${tx}px, ${ty}px) scale(${cfg.scale})`;
+    const r = cfg.rot ?? 0;
+    const s = cfg.scale ?? 1;
+    el.style.transform = `translate(${tx}px, ${ty}px) rotate(${r}deg) scale(${s})`;
   });
 }
 
 function centerScroll() {
   requestAnimationFrame(() => {
-    const maxX = scrollSurface.scrollWidth - scrollSurface.clientWidth;
-    const maxY = scrollSurface.scrollHeight - scrollSurface.clientHeight;
-    scrollSurface.scrollLeft = maxX > 0 ? maxX / 2 : 0;
-    scrollSurface.scrollTop = maxY > 0 ? maxY / 2 : 0;
+    const cw = scrollSurface.clientWidth;
+    const ch = scrollSurface.clientHeight;
+    scrollSurface.scrollLeft = Math.max(0, PLANE_PAD + torusTile / 2 - cw / 2);
+    scrollSurface.scrollTop = Math.max(0, PLANE_PAD + torusTile / 2 - ch / 2);
     syncCrossParallax();
     updateDepth();
   });
 }
 
 function updateDepth() {
-  const maxX = scrollSurface.scrollWidth - scrollSurface.clientWidth || 1;
-  const maxY = scrollSurface.scrollHeight - scrollSurface.clientHeight || 1;
-  const nx = scrollSurface.scrollLeft / maxX;
-  const ny = scrollSurface.scrollTop / maxY;
+  const TILE = torusTile || 1;
+  const nx = (scrollSurface.scrollLeft % TILE) / TILE;
+  const ny = (scrollSurface.scrollTop % TILE) / TILE;
   depthVal.textContent = Math.hypot(nx, ny).toFixed(2);
 }
 
@@ -329,16 +380,21 @@ function bindPan() {
         suppressCardClick = false;
       }, 80);
     }
+    applyTorusWrap();
   });
 
   scrollSurface.addEventListener(
     "wheel",
     (e) => {
       if (!lightbox.hidden) return;
+      e.preventDefault();
       if (e.shiftKey) {
-        e.preventDefault();
         scrollSurface.scrollLeft += e.deltaY;
+      } else {
+        scrollSurface.scrollLeft += e.deltaX;
+        scrollSurface.scrollTop += e.deltaY;
       }
+      applyTorusWrap();
     },
     { passive: false }
   );
@@ -359,6 +415,7 @@ document.addEventListener("mousemove", (e) => {
 
 scrollSurface.addEventListener("scroll", () => {
   syncCrossParallax();
+  applyTorusWrap();
   updateDepth();
 });
 
