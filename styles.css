@@ -1,77 +1,102 @@
-@@ -11,8 +11,10 @@
-</head>
-<body>
-  <div class="void-bg" aria-hidden="true">
-    <div class="void-grid"></div>
-    <div class="void-glow"></div>
-    <div class="line-field line-field--far"></div>
-    <div class="line-field line-field--mid"></div>
-    <div class="line-field line-field--near"></div>
-    <div class="void-bloom"></div>
-    <div class="void-scan"></div>
-  </div>
-
-@@ -22,7 +24,7 @@
-    <div class="hud-brand">
-      <span class="hud-mark">◇</span>
-      <span class="hud-title">VOID.LOG</span>
-      <span class="hud-sub">个人节点 / 静态缓存</span>
-      <span class="hud-sub">十字轨道 / 玻璃缓存</span>
-    </div>
-    <div class="hud-meta">
-      <span id="clock">--:--:--</span>
-@@ -33,31 +35,42 @@
-
-  <main class="stage">
-    <section class="intro-panel">
-      <p class="intro-line">在空白数据海里滑动条目，点击以展开图像层。</p>
-      <p class="intro-hint">← 横向滑动 / 滚轮（Shift+滚轮）→</p>
-      <p class="intro-line">横轨与竖轨在虚空里交叉；条目像数据带一样延伸。点击后银线迸发，选中图在空白中央浮出。</p>
-      <p class="intro-hint">滚轮：在竖带区域上下滑，其余区域左右滑 · Esc 关闭</p>
-    </section>
-
-    <div class="perspective-wrap">
-      <div class="rail-connector" aria-hidden="true"></div>
-      <div class="list-scroller" id="scroller" role="region" aria-label="文章滑动条带">
-        <!-- cards injected by JS -->
-    <div class="cross-stage" id="crossStage">
-      <div class="rail rail--h" id="railH" role="region" aria-label="横向图像带">
-        <div class="rail-track rail-track--h" id="trackH"></div>
-      </div>
-      <div class="rail rail--v" id="railV" role="region" aria-label="纵向图像带">
-        <div class="rail-track rail-track--v" id="trackV"></div>
-      </div>
-      <div class="cross-glass cross-glass--h" aria-hidden="true"></div>
-      <div class="cross-glass cross-glass--v" aria-hidden="true"></div>
-    </div>
-  </main>
-
-  <footer class="hud-bottom">
-    <span>ANTI-DRIFT</span>
-    <span class="footer-quote" id="footerQuote">纵使人们都认为你在说谎</span>
-    <span class="footer-quote">纵使人们都认为你在说谎</span>
-    <span>LINK STABLE</span>
-  </footer>
-
-  <div class="lightbox" id="lightbox" hidden>
-    <div class="lb-ribbons" id="lbRibbons" aria-hidden="true"></div>
-    <div class="lb-grid-faint" aria-hidden="true"></div>
-    <div class="lb-diamond-field" id="lbDiamond" aria-hidden="true"></div>
-    <button type="button" class="lightbox-close" id="lbClose" aria-label="关闭">×</button>
-    <div class="lightbox-frame">
-      <img class="lightbox-img" id="lbImg" alt="" />
-      <div class="lightbox-caption">
-        <h2 id="lbTitle"></h2>
-        <p id="lbExcerpt"></p>
-    <div class="lightbox-hero-wrap">
-      <div class="lightbox-frame">
-        <div class="lightbox-img-shell">
-          <img class="lightbox-img" id="lbImg" alt="" />
-        </div>
-        <div class="lightbox-caption">
-          <h2 id="lbTitle"></h2>
-          <p id="lbExcerpt"></p>
-        </div>
-      </div>
-    </div>
-  </div>
+  top: 1.25rem;
+  right: 1.5rem;
+  width: 44px;
+  height: 44px;
+  border: 1px solid rgba(90, 212, 255, 0.5);
+  border-radius: 4px;
+  background: rgba(255, 255, 255, 0.5);
+  color: var(--text);
+  font-size: 1.5rem;
+  line-height: 1;
+  cursor: pointer;
+  transition: background 0.2s, box-shadow 0.2s;
+}
+.lightbox-close:hover {
+  background: rgba(255, 255, 255, 0.85);
+  box-shadow: 0 0 20px rgba(90, 212, 255, 0.35);
+}
+.lightbox-frame {
+  max-width: min(92vw, 960px);
+  max-height: min(86vh, 900px);
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  padding: 1rem;
+  border: 1px solid rgba(90, 212, 255, 0.55);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.35);
+  box-shadow: var(--glow), 0 32px 80px rgba(80, 130, 180, 0.15);
+  animation: lb-pop 0.55s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+@keyframes lb-pop {
+  from {
+    opacity: 0;
+    transform: scale(0.88) translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+.lightbox-img {
+  display: block;
+  max-width: 100%;
+  max-height: min(62vh, 640px);
+  width: auto;
+  height: auto;
+  margin: 0 auto;
+  object-fit: contain;
+  border-radius: 4px;
+  box-shadow: 0 8px 40px rgba(60, 100, 140, 0.12);
+}
+.lightbox-caption h2 {
+  margin: 0 0 0.35rem;
+  font-size: 1.1rem;
+  font-weight: 500;
+}
+.lightbox-caption p {
+  margin: 0;
+  font-size: 0.88rem;
+  color: var(--text-soft);
+  line-height: 1.55;
+}
+@media (max-width: 640px) {
+  .hud-top {
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+  .hud-meta {
+    text-align: left;
+  }
+  .list-scroller {
+    gap: 1rem;
+    padding: 1.5rem calc(50vw - 100px) 2.5rem;
+    transform: rotateX(4deg);
+  }
+  .card {
+    flex: 0 0 200px;
+    width: 200px;
+    height: 200px;
+  }
+  .hud-bottom {
+    flex-wrap: wrap;
+    gap: 0.35rem;
+    justify-content: center;
+  }
+  .footer-quote {
+    order: 3;
+    flex-basis: 100%;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .void-grid,
+  .void-scan {
+    animation: none;
+  }
+  .list-scroller {
+    scroll-behavior: auto;
+  }
+  .card {
+    transition: none;
+  }
+}
