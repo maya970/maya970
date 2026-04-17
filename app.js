@@ -66,9 +66,11 @@
   let raf = 0;
   let dragging = false;
   let startY = 0;
+  let startX = 0;
   let startOffset = 0;
   let dragMoved = 0;
   let suppressClick = false;
+  let capturePointerId = null;
 
   function layoutBounds() {
     const h = scene.clientHeight;
@@ -149,15 +151,14 @@
       if (settled) return;
       settled = true;
       lightbox.hidden = true;
-      lightbox.removeEventListener("transitionend", onEnd);
       window.clearTimeout(fallback);
     };
     const onEnd = (e) => {
-      if (e.target !== lightbox) return;
+      if (e.target !== lightbox || e.propertyName !== "opacity") return;
       finish();
     };
     const fallback = window.setTimeout(finish, 700);
-    lightbox.addEventListener("transitionend", onEnd);
+    lightbox.addEventListener("transitionend", onEnd, { once: true });
   }
 
   posts.forEach((post) => {
@@ -208,34 +209,61 @@
   );
 
   scene.addEventListener("pointerdown", (e) => {
+    if (e.button !== undefined && e.button !== 0) return;
     dragging = true;
     dragMoved = 0;
     suppressClick = false;
+    capturePointerId = null;
     scene.classList.add("is-dragging");
     startY = e.clientY;
+    startX = e.clientX;
     startOffset = offsetY;
     velY = 0;
-    scene.setPointerCapture(e.pointerId);
+    /* 不在按下时 capture，避免吞掉按钮的 click（部分浏览器上会导致灯箱无法打开） */
   });
 
   scene.addEventListener("pointermove", (e) => {
     if (!dragging) return;
-    dragMoved += Math.abs(e.movementY) + Math.abs(e.movementX);
+    dragMoved = Math.max(
+      dragMoved,
+      Math.hypot(e.clientX - startX, e.clientY - startY)
+    );
+    if (capturePointerId == null && dragMoved > 12) {
+      try {
+        scene.setPointerCapture(e.pointerId);
+        capturePointerId = e.pointerId;
+      } catch (_) {
+        capturePointerId = null;
+      }
+    }
     const dy = e.clientY - startY;
     offsetY = clampOffset(startOffset + dy);
     velY = e.movementY * 1.2;
   });
 
-  scene.addEventListener("pointerup", () => {
-    if (dragMoved > 14) suppressClick = true;
+  function releaseCapture() {
+    if (capturePointerId != null) {
+      try {
+        scene.releasePointerCapture(capturePointerId);
+      } catch (_) {
+        /* ignore */
+      }
+      capturePointerId = null;
+    }
+  }
+
+  scene.addEventListener("pointerup", (e) => {
+    if (dragMoved > 22) suppressClick = true;
     dragging = false;
     scene.classList.remove("is-dragging");
+    releaseCapture();
   });
 
   scene.addEventListener("pointercancel", () => {
     suppressClick = true;
     dragging = false;
     scene.classList.remove("is-dragging");
+    releaseCapture();
   });
 
   lbClose.addEventListener("click", closeLightbox);
