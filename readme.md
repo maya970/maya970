@@ -1,7 +1,8 @@
 <div align="center">
   <h1>🎮 Maya970 的赛博档案 🚀</h1>
-<p>- **[blog](maya970.vercel.app)**</p>
+
 </div>
+- **[blog](maya970.vercel.app)**
 
 ---
 
