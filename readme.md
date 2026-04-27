@@ -60,7 +60,7 @@
 - **[黑暗轻小说-历史穿越小说推荐网站](https://booklist-two-ebon.vercel.app/cn/index.html)**: 历史小说一览表 **[github库](https://github.com/maya970/Recommended_History-novel)**
 - **[Arweave永久存储日记](https://arjournal.vercel.app/)**: Arweave永久存储日记 **[github库](https://github.com/maya970/Arweave_Novel_Navigation)**
 - **[Arweave永久小说网站](https://arnovel.vercel.app/)**: Arweave永久小说网站 **[github库](https://github.com/maya970/Arweave_Diary_Navigation)**
-- **[冒险者公会推书网](https://novel.ct.ws/)**: 冒险者公会推书网)**
+- **[冒险者公会推书网](https://novel.ct.ws/)**
 
 <div align="center">
   <p>🔥 由热情与代码驱动 ☕</p>
