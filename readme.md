@@ -20,9 +20,9 @@
       <th>完成度</th>
     </tr>
     <tr>
-      <td>🗡 地下城冒险</td>
+      <td>🗡 地下城冒险DEMO</td>
       <td>一款用于参加比赛的游戏</td>
-      <td><img src="https://img.shields.io/badge/进度-15%25-blueviolet?style=plastic&logo=php"/></td>
+      <td><img src="https://img.shields.io/badge/进度-100%25-blueviolet?style=plastic&logo=php"/></td>
     </tr>
     <tr>
       <td>🥃 冒险者公会重置</td>
@@ -32,7 +32,7 @@
     <tr>
       <td>📕 推书网站</td>
       <td>构建流畅的用户界面</td>
-      <td><img src="https://img.shields.io/badge/进度-65%25-green?style=plastic&logo=vue.js"/></td>
+      <td><img src="https://img.shields.io/badge/进度-100%25-green?style=plastic&logo=vue.js"/></td>
     </tr>
     <tr>
       <td>🏰 塔</td>
