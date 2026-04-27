@@ -2,8 +2,7 @@
   <h1>🎮 Maya970 的赛博档案 🚀</h1>
 
 </div>
-- **[冒险者公会推书网](https://novel.ct.ws/)**
-
+<a href="https://example.com">点击这里访问示例网站</a>
 ---
 
 ## 🛠️ 赛博技能矩阵
