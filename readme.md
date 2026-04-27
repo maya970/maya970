@@ -1,8 +1,6 @@
 <div align="center">
   <h1>🎮 Maya970 的赛博档案 🚀</h1>
-  <p>60级代码巫师 | 用热情与代码打造数字领域</p>
-  
-
+<p> **[blog](maya970.vercel.app)**</p>
 </div>
 
 ---
