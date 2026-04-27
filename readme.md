@@ -2,7 +2,7 @@
   <h1>🎮 Maya970 的赛博档案 🚀</h1>
 
 </div>
-- **[blog](maya970.vercel.app)**
+- **[冒险者公会推书网](https://novel.ct.ws/)**
 
 ---
 
