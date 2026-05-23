@@ -1,12 +1,13 @@
 <div align="center">
-  <h1>🎮 Maya970 的赛博档案 🚀</h1>
+  <h1> Maya970 的 github 项目简介 </h1>
+  <h5> 以下内容仅为非常小的一部分。 </h5>
 <p><a href="https://maya970.vercel.app/">BLOG</a></p>
 </div>
 
 
 ---
 
-## 🛠️ 过往项目列表
+## 🛠️ 项目列表
 <div align="center">
   ╔══════════════════════════════════════╗
   
@@ -39,5 +40,5 @@
 - **[基于Initia公链的冒险者地牢](https://crpg.vercel.app/)**
 
 <div align="center">
-  <p>🔥 由热情与代码驱动 ☕</p>
+  <p>你不知道明天的天气是什么，但你知道，春天之后是夏天，不要自己打倒自己，每个人都有冬去春来那一天。 </p>
 </div>
