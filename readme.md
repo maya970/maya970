@@ -36,7 +36,7 @@
 
 - **[黑暗轻小说-历史穿越小说推荐网站](https://booklist-two-ebon.vercel.app/cn/index.html)**: 历史小说一览表 **[github库](https://github.com/maya970/Recommended_History-novel)**
 - **[Arweave永久存储日记](https://arjournal.vercel.app/)**: Arweave永久存储日记 **[github库](https://github.com/maya970/Arweave_Novel_Navigation)**
-- **[冒险者地牢](https://crpg.vercel.app/)**
+- **[基于Initia公链的冒险者地牢](https://crpg.vercel.app/)**
 
 <div align="center">
   <p>🔥 由热情与代码驱动 ☕</p>
