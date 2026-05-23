@@ -1,6 +1,7 @@
 <div align="center">
   <h1> Maya970 的 github 项目简介 </h1>
   <h5> 以下项目内容仅为所做过的非常小的一部分，更Mini的非联网项目，请访问BLOG。 </h5>
+  <h6> Mini的项目不代表不如成熟项目，成熟的项目也是从精巧的思路延申而成。。 </h6>
 <p><a href="https://maya970.vercel.app/">BLOG</a></p>
 </div>
 
