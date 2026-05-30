@@ -18,6 +18,7 @@
 | 项目 | 描述 | 完成度 |
 |------|------|--------|
 | 📕 **[冒险者公会](https://mxzgh.com/)** | 小说、游戏、动漫、链上与社区讨论——发现好作品，而不只一种体裁。 | <img src="https://img.shields.io/badge/进度-100%25-blueviolet?style=plastic&logo=php"/> |
+| 🥃 **[Arweave永久代码网站](https://permagit.vercel.app/)** | 去中心化的代码网站，链上存储永久保存，200年不丢失。 | <img src="https://img.shields.io/badge/进度-100%25-orange?style=plastic&logo=javascript"/> |
 | 🥃 **[Arweave永久小说网站](https://arnovel.vercel.app/)** | 去中心化的小说网站，链上存储永久保存，200年不丢失。 | <img src="https://img.shields.io/badge/进度-50%25-orange?style=plastic&logo=javascript"/> |
 | 🏰 **[冒险者地牢-联网单机版](https://ar.gt.tc/)** | 攀登冒险者的最高峰，走进地牢的最深处，与150+玩家一起进行攀登。 | <img src="https://img.shields.io/badge/进度-30%25-green?style=plastic&logo=three.js"/> |
 | 🗡 **[大荒原的救赎](https://msx.es.ht/)** | 由一人制作的开放世界游戏，你生下来就是一直在地下城里冒险，所有人都告诉你，外面是不能去的，外面有辐射，难道我们的命运就是在这里挖一辈子的煤吗？ | <img src="https://img.shields.io/badge/进度-10%25-pink?style=plastic&logo=php"/> |
