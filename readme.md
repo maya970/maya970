@@ -25,7 +25,7 @@
 | 💊 **[中药分析](https://74pol5oljr4uqen5rpews47pyiy2i2syacxpad2smoyqhp4sp3pq.arweave.net/_x7l9ctMeUgRvYvJaXPvwjGkalgArvAPUmOxA7-Sft8)** | 中药分析| <img src="https://img.shields.io/badge/进度-10%25-pink?style=plastic&logo=php"/> |
 | 🚀 **[星际帝国](https://dhy.rf.gd/)** | 又一款星际游戏| <img src="https://img.shields.io/badge/进度-10%25-pink?style=plastic&logo=php"/> |
 
-
+| 🚀 **[日记本](https://tdlgzh4yfbod5pejunkne52r7tcntsw436dgklhm6ll64nemtxrq.arweave.net/mNZsn5goXD68iaNU0ndR_MTZytzfhmUs7PLX7jSMneM)** | 又一款星际游戏| <img src="https://img.shields.io/badge/进度-10%25-pink?style=plastic&logo=php"/> |
 ---
 
 ## 🔗 连接网络
