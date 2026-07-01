@@ -24,7 +24,7 @@
 | 🗡 **[大荒原的救赎](https://msx.es.ht/)** | 由一人制作的开放世界游戏，你生下来就是一直在地下城里冒险，所有人都告诉你，外面是不能去的，外面有辐射，难道我们的命运就是在这里挖一辈子的煤吗？ | <img src="https://img.shields.io/badge/进度-10%25-pink?style=plastic&logo=php"/> |
 | 💊 **[中药分析](https://74pol5oljr4uqen5rpews47pyiy2i2syacxpad2smoyqhp4sp3pq.arweave.net/_x7l9ctMeUgRvYvJaXPvwjGkalgArvAPUmOxA7-Sft8)** | 中药分析| <img src="https://img.shields.io/badge/进度-10%25-pink?style=plastic&logo=php"/> |
 | 🚀 **[星际帝国](https://dhy.rf.gd/)** | 又一款星际游戏| <img src="https://img.shields.io/badge/进度-10%25-pink?style=plastic&logo=php"/> |
-| 🚀 **[日记本](https://tdlgzh4yfbod5pejunkne52r7tcntsw436dgklhm6ll64nemtxrq.arweave.net/mNZsn5goXD68iaNU0ndR_MTZytzfhmUs7PLX7jSMneM)** | 日记本| <img src="https://img.shields.io/badge/进度-10%25-pink?style=plastic&logo=php"/> |
+| 🚀 **[日记本](https://arweave.net/2p2D9BxzxpIKUJvUpFO1X_nEmXUrtO-H7ZBsj7eiZAU)** | 日记本| <img src="https://img.shields.io/badge/进度-10%25-pink?style=plastic&logo=php"/> |
 ---
 
 ## 🔗 连接网络
